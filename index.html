@@ -59,6 +59,7 @@
         let userId = 'anon_user';
         const ADMIN_PASSWORD = 'adminganteng';
         let leagueData = null;
+        let isAdminLoggedIn = false; // FIX: Menambahkan flag global untuk status login
 
         // Path dokumen publik untuk data liga
         const getLeagueDocRef = (dbInstance) => {
@@ -508,9 +509,9 @@
             if (password === ADMIN_PASSWORD) {
                 hideAdminModal(); // Sembunyikan modal
                 
-                // Tampilkan panel admin
-                document.getElementById('admin-panel-placeholder').innerHTML = renderAdminPanel();
-                renderApp(leagueData); // Re-render untuk mengaktifkan input skor
+                // FIX: Gunakan flag global dan panggil renderApp untuk rendering panel
+                isAdminLoggedIn = true; 
+                renderApp(leagueData); 
             } else {
                 message.textContent = 'Kata sandi Admin salah.';
                 passwordInput.value = '';
@@ -518,7 +519,8 @@
         };
 
         window.hideAdminPanel = () => {
-            document.getElementById('admin-panel-placeholder').innerHTML = '';
+            // FIX: Gunakan flag global dan panggil renderApp untuk logout
+            isAdminLoggedIn = false;
             renderApp(leagueData); // Re-render untuk menonaktifkan input skor
         };
 
@@ -527,9 +529,9 @@
             const appContainer = document.getElementById('app-container');
             const standings = calculateStandings(data);
             
-            // Cek apakah panel admin sedang ditampilkan
-            isAdminLoggedIn = document.getElementById('admin-panel-placeholder').innerHTML !== '';
-
+            // FIX: Hapus pengecekan DOM yang menyebabkan error, kini menggunakan flag global
+            // Cek apakah panel admin sedang ditampilkan (menggunakan flag global)
+            
             // Render konten utama
             appContainer.innerHTML = `
                 <div class="lg:flex lg:space-x-8">
@@ -544,7 +546,8 @@
                     </div>
                 </div>
 
-                <div id="admin-panel-placeholder">${isAdminLoggedIn ? renderAdminPanel() : ''}</div>
+                <!-- Render panel admin jika flag true -->
+                ${isAdminLoggedIn ? renderAdminPanel() : ''}
             `;
 
             // Atur status disabled pada input skor berdasarkan status login
