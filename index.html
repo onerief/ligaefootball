@@ -19,9 +19,9 @@
         }
         .card {
             background-color: white;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
+            border-radius: 0.75rem; /* Slightly smaller radius */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Softer shadow */
+            padding: 1rem; /* Reduced padding */
         }
         .btn-primary {
             background-color: #3b82f6;
@@ -37,21 +37,31 @@
         .table-header {
             background-color: #eff6ff;
         }
-        /* Custom style to ensure input fields are only visible and responsive for Admin */
+        /* Custom style for score input fields */
         .admin-input-cell {
-            padding: 0.25rem;
+            padding: 0.1rem;
             line-height: 1;
         }
         .admin-input-score {
-            width: 32px; /* Small width for score input */
-            height: 30px;
-            padding: 2px;
+            width: 28px; /* Small width for score input */
+            height: 24px;
+            padding: 1px;
+            font-size: 0.75rem;
             border: 1px solid #ccc;
         }
-        /* Penyesuaian padding tabel untuk kepadatan lebih tinggi */
+        /* Penyesuaian padding tabel untuk kepadatan sangat tinggi */
         .dense-table th, .dense-table td {
-            padding-top: 6px;
-            padding-bottom: 6px;
+            padding-top: 4px; 
+            padding-bottom: 4px;
+            padding-left: 6px;
+            padding-right: 6px;
+            font-size: 0.75rem; /* text-xs */
+        }
+        /* Override Tailwind's default button padding for density */
+        .btn-dense {
+            padding-top: 0.25rem; /* py-1 */
+            padding-bottom: 0.25rem; /* py-1 */
+            font-size: 0.65rem; /* Smaller text */
         }
     </style>
 </head>
@@ -515,42 +525,42 @@
 
         const renderStandings = (standings) => {
             return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Klasemen Liga</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-3">Klasemen Liga</h2>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dense-table">
+                    <table class="min-w-full divide-y divide-gray-200 dense-table text-xs">
                         <thead>
-                            <tr class="table-header text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                <th class="py-2 px-3 rounded-tl-lg">#</th>
-                                <th class="py-2 px-3">Klub</th>
-                                <th class="py-2 px-3">M</th>
-                                <th class="py-2 px-3">S</th>
-                                <th class="py-2 px-3">K</th>
-                                <th class="py-2 px-3">GM</th>
-                                <th class="py-2 px-3">GK</th>
-                                <th class="py-2 px-3">P</th>
-                                <th class="py-2 px-3">SG</th>
-                                <th class="py-2 px-3 rounded-tr-lg">Poin</th>
+                            <tr class="table-header text-left font-semibold text-gray-600 uppercase tracking-wider">
+                                <th class="py-1 px-2 rounded-tl-lg">#</th>
+                                <th class="py-1 px-2">Klub</th>
+                                <th class="py-1 px-2">M</th>
+                                <th class="py-1 px-2">S</th>
+                                <th class="py-1 px-2">K</th>
+                                <th class="py-1 px-2">GM</th>
+                                <th class="py-1 px-2">GK</th>
+                                <th class="py-1 px-2">P</th>
+                                <th class="py-1 px-2">SG</th>
+                                <th class="py-1 px-2 rounded-tr-lg">Poin</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             ${standings.map((team, index) => `
                                 <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors">
-                                    <td class="py-2 px-3 font-medium">${index + 1}</td>
-                                    <td class="py-2 px-3 font-semibold text-gray-900">${team.name}</td>
-                                    <td class="py-2 px-3">${team.wins}</td>
-                                    <td class="py-2 px-3">${team.draws}</td>
-                                    <td class="py-2 px-3">${team.losses}</td>
-                                    <td class="py-2 px-3">${team.goalsFor}</td>
-                                    <td class="py-2 px-3">${team.goalsAgainst}</td>
-                                    <td class="py-2 px-3">${team.played}</td>
-                                    <td class="py-2 px-3 font-bold ${team.diff > 0 ? 'text-green-600' : team.diff < 0 ? 'text-red-600' : 'text-gray-500'}">${team.diff}</td>
-                                    <td class="py-2 px-3 text-lg font-extrabold text-blue-600">${team.points}</td>
+                                    <td class="py-1 px-2 font-medium">${index + 1}</td>
+                                    <td class="py-1 px-2 font-semibold text-gray-900 whitespace-nowrap">${team.name}</td>
+                                    <td class="py-1 px-2">${team.wins}</td>
+                                    <td class="py-1 px-2">${team.draws}</td>
+                                    <td class="py-1 px-2">${team.losses}</td>
+                                    <td class="py-1 px-2">${team.goalsFor}</td>
+                                    <td class="py-1 px-2">${team.goalsAgainst}</td>
+                                    <td class="py-1 px-2">${team.played}</td>
+                                    <td class="py-1 px-2 font-bold ${team.diff > 0 ? 'text-green-600' : team.diff < 0 ? 'text-red-600' : 'text-gray-500'}">${team.diff}</td>
+                                    <td class="py-1 px-2 font-extrabold text-blue-600">${team.points}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
                 </div>
-                <p class="text-xs text-gray-500 mt-4">
+                <p class="text-xs text-gray-500 mt-2">
                     Keterangan: P=Main, M=Menang, S=Seri, K=Kalah, GM=Gol Memasukkan, GK=Gol Kemasukan, SG=Selisih Gol, Poin=Poin.
                 </p>
             `;
@@ -568,19 +578,19 @@
             const babakKeys = Object.keys(groupedSchedule).sort((a, b) => parseInt(a) - parseInt(b));
 
             return `
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Jadwal Pertandingan</h2>
-                <div class="space-y-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-3 mt-4">Jadwal Pertandingan</h2>
+                <div class="space-y-4">
                     ${babakKeys.map(babak => `
-                        <div class="border-b pb-4">
-                            <h3 class="text-xl font-bold text-gray-700 mb-3 border-l-4 border-blue-500 pl-2">Babak ${babak}</h3>
+                        <div class="border-b pb-2">
+                            <h3 class="text-base font-bold text-gray-700 mb-2 border-l-4 border-blue-500 pl-2">Babak ${babak}</h3>
                             <div class="overflow-x-auto w-full">
-                                <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border dense-table">
+                                <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border dense-table text-xs">
                                     <thead class="table-header">
-                                        <tr class="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            <th class="py-2 px-3 w-8">#</th>
-                                            <th class="py-2 px-3 text-left w-1/3">Tim Kandang</th>
-                                            <th class="py-2 px-3 text-center" colspan="3" style="min-width: 80px;">Skor</th>
-                                            <th class="py-2 px-3 text-right w-1/3">Tim Tandang</th>
+                                        <tr class="text-left font-semibold text-gray-600 uppercase tracking-wider">
+                                            <th class="py-1 px-2 w-8">#</th>
+                                            <th class="py-1 px-2 text-left w-1/3">Kandang</th>
+                                            <th class="py-1 px-2 text-center" colspan="3" style="min-width: 70px;">Skor</th>
+                                            <th class="py-1 px-2 text-right w-1/3">Tandang</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-100">
@@ -611,16 +621,15 @@
 
                                             // Determine content for the score cells
                                             const homeScoreCell = isAdminLoggedIn
-                                                ? `<input id="home-score-${globalIndex}" type="number" min="0" value="${homeScoreDisplay}" placeholder="0" class="admin-input-score text-sm font-bold text-center">`
-                                                : `<span class="text-base font-extrabold ${homeNameClass}">${homeScoreDisplay || '-'}</span>`;
-
+                                                ? `<input id="home-score-${globalIndex}" type="number" min="0" value="${homeScoreDisplay}" placeholder="0" class="admin-input-score font-bold text-center">`
+                                                : `<span class="font-bold ${homeNameClass}">${homeScoreDisplay || '-'}</span>`;
                                             const awayScoreCell = isAdminLoggedIn
-                                                ? `<input id="away-score-${globalIndex}" type="number" min="0" value="${awayScoreDisplay}" placeholder="0" class="admin-input-score text-sm font-bold text-center">`
-                                                : `<span class="text-base font-extrabold ${awayNameClass}">${awayScoreDisplay || '-'}</span>`;
+                                                ? `<input id="away-score-${globalIndex}" type="number" min="0" value="${awayScoreDisplay}" placeholder="0" class="admin-input-score font-bold text-center">`
+                                                : `<span class="font-bold ${awayNameClass}">${awayScoreDisplay || '-'}</span>`;
                                             
                                             const adminSaveButtonRow = isAdminLoggedIn ? 
                                                 `<tr class="bg-gray-50 border-t border-gray-200"><td colspan="6" class="py-1 px-2 text-center">
-                                                    <button onclick="submitScore(${globalIndex})" class="btn-primary text-white font-semibold py-1 px-3 rounded-lg text-xs transition duration-200 shadow-sm w-full">
+                                                    <button onclick="submitScore(${globalIndex})" class="btn-primary text-white font-semibold py-1 px-2 rounded-lg text-xs transition duration-200 shadow-sm w-full btn-dense">
                                                         Simpan Skor Match ${match.match || 'N/A'}
                                                     </button>
                                                 </td></tr>` : '';
@@ -628,12 +637,12 @@
 
                                             return `
                                                 <tr class="hover:bg-gray-50 transition-colors">
-                                                    <td class="py-2 px-3 text-sm font-medium text-center text-gray-600">${match.match || 'N/A'}</td>
-                                                    <td class="py-2 px-3 text-sm ${homeNameClass} font-semibold text-left whitespace-nowrap">${match.home}</td>
+                                                    <td class="py-1 px-2 font-medium text-center text-gray-600">${match.match || 'N/A'}</td>
+                                                    <td class="py-1 px-2 ${homeNameClass} font-semibold text-left whitespace-nowrap">${match.home}</td>
                                                     <td class="admin-input-cell text-center">${homeScoreCell}</td>
-                                                    <td class="py-2 px-1 text-center font-bold text-gray-500 text-sm">vs</td>
+                                                    <td class="py-1 px-1 text-center font-bold text-gray-500 text-xs">vs</td>
                                                     <td class="admin-input-cell text-center">${awayScoreCell}</td>
-                                                    <td class="py-2 px-3 text-sm ${awayNameClass} font-semibold text-right whitespace-nowrap">${match.away}</td>
+                                                    <td class="py-1 px-2 ${awayNameClass} font-semibold text-right whitespace-nowrap">${match.away}</td>
                                                 </tr>
                                                 ${adminSaveButtonRow}
                                             `;
@@ -937,7 +946,7 @@
             
             // Render konten utama
             appContainer.innerHTML = `
-                <div class="card p-6 w-full mb-8">
+                <div class="card p-4 w-full mb-8"> <!-- Reduced card padding -->
                     ${contentHtml}
                 </div>
                 <!-- Render panel admin jika flag true -->
@@ -973,44 +982,42 @@
     <!-- UI/UX Aplikasi -->
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="header-bg py-4 mb-8">
+        <header class="header-bg py-3 mb-4"> <!-- Reduced padding/margin -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-                <h1 class="text-3xl font-extrabold text-white tracking-tight">
+                <h1 class="text-2xl font-extrabold text-white tracking-tight">
                     <span class="text-yellow-300">Liga EFootball</span>
                 </h1>
-                <div class="flex items-center space-x-3">
-                    <div id="connection-status" class="p-2 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-700 transition-colors duration-300">
+                <div class="flex items-center space-x-2">
+                    <div id="connection-status" class="p-1 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-700 transition-colors duration-300">
                         Menunggu koneksi...
                     </div>
                     
                     <!-- Tombol Admin BARU (Memanggil Modal) -->
-                    <button onclick="showAdminModal()" class="bg-yellow-500 text-white font-semibold py-2 px-3 rounded-lg shadow-md hover:bg-yellow-600 transition-colors">
+                    <button onclick="showAdminModal()" class="bg-yellow-500 text-white font-semibold py-1 px-3 rounded-lg shadow-md hover:bg-yellow-600 transition-colors text-xs">
                         Admin
                     </button>
-                    <!-- Tombol Admin LAMA Dihapus -->
-
                 </div>
             </div>
         </header>
 
         <!-- Tab Navigation (NEW) -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-2"> <!-- Reduced margin -->
             <div class="flex border-b border-gray-300 rounded-t-lg overflow-hidden shadow-md">
-                <button id="tab-schedule" onclick="setActiveTab('schedule')" class="flex-1 py-3 px-6 text-center text-base font-semibold border-b-4 border-blue-600 bg-gray-50 transition-colors duration-200 text-gray-700">
+                <button id="tab-schedule" onclick="setActiveTab('schedule')" class="flex-1 py-2 px-3 text-center text-sm font-semibold border-b-4 border-blue-600 bg-gray-50 transition-colors duration-200 text-gray-700">
                     Jadwal & Skor
                 </button>
-                <button id="tab-standings" onclick="setActiveTab('standings')" class="flex-1 py-3 px-6 text-center text-base font-semibold border-b-4 border-transparent bg-white hover:border-blue-300 transition-colors duration-200 text-gray-700">
+                <button id="tab-standings" onclick="setActiveTab('standings')" class="flex-1 py-2 px-3 text-center text-sm font-semibold border-b-4 border-transparent bg-white hover:border-blue-300 transition-colors duration-200 text-gray-700">
                     Klasemen
                 </button>
             </div>
         </div>
 
         <!-- Konten Utama -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-            <div id="app-container" class="space-y-8">
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4"> <!-- Reduced padding -->
+            <div id="app-container" class="space-y-4">
                 <!-- Konten akan dirender oleh JavaScript -->
-                <div class="card p-8 text-center text-gray-500">
-                    <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <div class="card p-4 text-center text-gray-500">
+                    <svg class="animate-spin h-6 w-6 text-blue-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -1022,18 +1029,18 @@
 
     <!-- Admin Login MODAL (Popup) -->
     <div id="admin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Akses Admin</h2>
-            <p class="text-gray-600 mb-6">Masukkan kata sandi admin untuk melanjutkan.</p>
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
+            <h2 class="text-xl font-bold text-gray-800 mb-3">Akses Admin</h2>
+            <p class="text-sm text-gray-600 mb-4">Masukkan kata sandi admin untuk melanjutkan.</p>
             <input type="password" id="admin-password-input" 
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 mb-4" 
+                   class="w-full p-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 mb-3 text-sm" 
                    placeholder="Kata Sandi">
-            <p id="admin-login-message" class="text-red-500 text-sm mb-4"></p>
-            <div class="flex space-x-3">
-                <button onclick="authenticateAdmin()" class="flex-grow bg-red-600 text-white p-3 rounded-lg font-semibold hover:bg-red-700 transition duration-200">
+            <p id="admin-login-message" class="text-red-500 text-xs mb-3"></p>
+            <div class="flex space-x-2">
+                <button onclick="authenticateAdmin()" class="flex-grow bg-red-600 text-white p-2 rounded-lg font-semibold hover:bg-red-700 transition duration-200 text-sm">
                     Masuk
                 </button>
-                <button onclick="hideAdminModal()" class="bg-gray-300 text-gray-800 p-3 rounded-lg font-semibold hover:bg-gray-400 transition duration-200">
+                <button onclick="hideAdminModal()" class="bg-gray-300 text-gray-800 p-2 rounded-lg font-semibold hover:bg-gray-400 transition duration-200 text-sm">
                     Batal
                 </button>
             </div>
