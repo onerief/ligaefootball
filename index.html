@@ -3,18 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KANYE LIGA</title>
+    <title>LIGA TANI</title>
     <!-- Memuat Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Firebase SDK Imports (Versi 11.6.1) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, addDoc, getDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
-        // Expose Firebase tools globally for the main script block to use
-        window.firebase = { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, getFirestore, doc, setDoc, onSnapshot, collection, query, addDoc, getDoc, setLogLevel };
+    
+    <!-- FIX: Firebase SDK Imports - Menggunakan pemuatan standar (non-module) -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Mensejajarkan kompatibilitas Firebase dengan kode yang sudah ada.
+        window.firebase = {
+            initializeApp: firebase.initializeApp,
+            getAuth: firebase.auth,
+            signInAnonymously: (auth) => auth.signInAnonymously(),
+            signInWithCustomToken: (auth, token) => auth.signInWithCustomToken(token),
+            onAuthStateChanged: firebase.auth().onAuthStateChanged,
+            getFirestore: firebase.firestore,
+            doc: (db, path, docId) => db.doc(path + '/' + docId),
+            setDoc: (docRef, data) => docRef.set(data),
+            onSnapshot: (docRef, callback, errorCallback) => docRef.onSnapshot(callback, errorCallback),
+            collection: (db, path) => db.collection(path),
+            query: (collectionRef) => collectionRef,
+            addDoc: (collectionRef, data) => collectionRef.add(data),
+            getDoc: (docRef) => docRef.get(),
+            setLogLevel: (level) => firebase.firestore.setLogLevel(level)
+        };
     </script>
+    <!-- END FIX FIREBASE IMPORTS -->
+    
     <style>
         /* Custom styles */
         .header-bg {
@@ -201,15 +219,15 @@
         const FIREBASE_COLLECTION_PATH = 'artifacts'; // Fixed path for the public data
 
         // --- START KONFIGURASI PENGGUNA FIREBASE ---
-        // GANTI NILAI DI BAWAH INI dengan kredensial dari Konsol Firebase Anda!
+        // KREDENSIAL wayliga Anda:
         const USER_FIREBASE_CONFIG = {
-            apiKey: "AIzaSyCfikX-HQuKhtSksHzyJwuBF-dUr0ckGRE", // Ganti dengan apiKey Anda
-            authDomain: "wayliga.firebaseapp.com", // Ganti dengan authDomain Anda
-            projectId: "wayliga", // Ganti dengan projectId Anda
-            storageBucket: "wayliga.firebasestorage.app", // Ganti dengan storageBucket Anda
-            messagingSenderId: "178418335963", // Ganti dengan messagingSenderId Anda
-            appId: "1:178418335963:web:a9ff5dadc64fa9cdcf8cfe", // Ganti dengan appId Anda
-            measurementId: "G-5QDKCZDL8X" // Opsional
+            apiKey: "AIzaSyCfikX-HQuKhtSksHzyJwuBF-dUr0ckGRE", 
+            authDomain: "wayliga.firebaseapp.com", 
+            projectId: "wayliga", 
+            storageBucket: "wayliga.firebasestorage.app", 
+            messagingSenderId: "178418335963", 
+            appId: "1:178418335963:web:a9ff5dadc64fa9cdcf8cfe", 
+            measurementId: "G-5QDKCZDL8X" 
         };
         // --- END KONFIGURASI PENGGUNA FIREBASE ---
 
@@ -247,12 +265,6 @@
             const { initializeApp, getAuth, signInAnonymously, signInWithCustomToken, getFirestore, setLogLevel, collection } = window.firebase;
             
             try {
-                // Check if the user has replaced the placeholder keys
-                if (firebaseConfig.apiKey === "YOUR_API_KEY" && !canvasFirebaseConfig) {
-                    showAppStatus('PERINGATAN: Konfigurasi Firebase belum diatur. Menggunakan mode statis/lokal. Ganti placeholder di skrip!', 'red');
-                    return; 
-                }
-
                 // Set Firebase logging level (only if running inside the environment)
                 setLogLevel('Debug');
                 
@@ -262,8 +274,10 @@
                 
                 // AUTHENTICATION
                 if (initialAuthToken) {
+                    // This is used for Canvas environment authentication
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
+                    // Anonymous sign-in for public access (required by security rules for writing)
                     await signInAnonymously(auth);
                 }
 
@@ -440,41 +454,53 @@
             const selector = document.getElementById('league-selector');
             if (!selector) return;
 
+            // Pastikan data tersimpan sebelum mengisi ulang
+            saveDataToLocalStorage(); 
+            
             // Sort leagues alphabetically by title
             const sortedLeagues = [...allLeagues].sort((a, b) => a.title.localeCompare(b.title));
-            
+
             selector.innerHTML = sortedLeagues.map(league => 
                 `<option value="${league.id}" ${league.id === currentLeagueId ? 'selected' : ''}>${league.title}</option>`
             ).join('');
 
+            // Atur listener setelah elemen diisi ulang
             selector.onchange = (e) => switchLeague(e.target.value);
         }
 
         function switchLeague(id) {
+            
+            if (currentLeagueId === id) return;
+            
             currentLeagueId = id;
             const newLeague = allLeagues.find(l => l.id === id);
             if (newLeague) {
                 leagueTitle = newLeague.title;
                 tournamentData = newLeague.data;
             }
+            
+            // Save immediately after switching the current League ID
+            saveDataToCloud(); 
 
             initializeAppUI(false); 
             switchTab('matches'); 
-            saveDataToCloud(); // Save the new current league ID preference
         }
 
         async function addNewLeague() {
             const newLeagueInput = document.getElementById('new-league-title-input');
             const inputTitle = newLeagueInput.value.trim();
             
+            // 1. Generate ID dan Title
             const newId = 'league-' + Date.now() + (crypto.randomUUID ? crypto.randomUUID().substring(0, 4) : '');
             const cleanTitle = inputTitle || `Liga Baru ${allLeagues.length + 1}`;
 
+            // 2. Cek duplikasi
             if (allLeagues.map(l => l.title.toLowerCase()).includes(cleanTitle.toLowerCase())) {
                  showAdminStatus(`Liga dengan nama "${cleanTitle}" sudah ada.`, 'red');
                  return;
             }
             
+            // 3. Buat objek liga baru (dengan data kosong)
             const newLeague = {
                 id: newId,
                 title: cleanTitle,
@@ -563,6 +589,22 @@
 
         // --- Admin Edit Functions ---
         
+        /**
+         * Menampilkan pesan status/konfirmasi di panel admin.
+         */
+        function showAdminStatus(message, color = 'green') {
+            const status = document.getElementById('admin-status-message');
+            if (!status) return;
+            
+            if (message.includes('<div')) {
+                 status.innerHTML = message;
+                 return;
+            }
+
+            status.innerHTML = `<p class="font-semibold ${color === 'red' ? 'text-red-600' : 'text-green-600'}">${message}</p>`;
+            setTimeout(() => status.innerHTML = '', 4000);
+        }
+
         async function updateLeagueTitle() {
             const newTitle = document.getElementById('league-title-input').value.trim();
             if (newTitle) {
@@ -622,7 +664,9 @@
                 if (match.Bye === teamName) match.Bye = '';
             });
 
+            // Hapus baris Babak 0 jika tim ada di sana
             tournamentData = tournamentData.filter(match => !(match.Babak === 0 && match.Bye === ''));
+
 
             await saveDataToCloud();
             renderAdminPanel();
@@ -646,12 +690,11 @@
         
         async function resetData() {
             leagueTitle = DEFAULT_LEAGUE_TITLE;
+            // Hanya mereset data pertandingan di liga aktif
             tournamentData = JSON.parse(JSON.stringify(initialRawTournamentData)); 
-            currentLeagueId = allLeagues[0].id; // Re-select default league
             
-            // Remove other leagues, keep only the default
-            allLeagues = allLeagues.filter(l => l.id === currentLeagueId);
-            
+            // Note: We don't reset allLeagues array, only the active league data.
+
             await saveDataToCloud();
             renderAdminPanel();
             showAdminStatus('Data pertandingan di liga aktif berhasil direset ke kondisi awal!');
@@ -670,60 +713,28 @@
              showAdminStatus(confirmationHtml);
         }
 
-        async function importRoundData(event, roundNumber) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // --- INLINE SCORE UPDATE FUNCTION ---
+        async function updateScoreInline(globalMatchIndex, teamNumber, newScore) {
+            // Treat empty string input as empty score, otherwise parse as integer
+            const score = newScore === '' ? '' : parseInt(newScore); 
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const importedMatches = JSON.parse(e.target.result);
-                    if (!Array.isArray(importedMatches)) {
-                        throw new Error("File JSON tidak berisi daftar pertandingan (Array).");
-                    }
+            if (globalMatchIndex < 0 || globalMatchIndex >= tournamentData.length) return;
+            if (isNaN(score) && newScore !== '') return; 
 
-                    let matchesUpdated = 0;
-                    tournamentData.forEach(existingMatch => {
-                        if (existingMatch.Babak === roundNumber && existingMatch.Match !== '' && existingMatch.Match !== undefined) {
-                            
-                            const importedMatch = importedMatches.find(im => {
-                                if (im.Match && existingMatch.Match && im.Match == existingMatch.Match) return true; 
-                                if (im['Tim 1'] === existingMatch['Tim 1'] && im['Tim 2'] === existingMatch['Tim 2']) return true; 
-                                return false;
-                            });
-
-                            if (importedMatch) {
-                                const score1 = parseInt(importedMatch['Skor 1']);
-                                const score2 = parseInt(importedMatch['Skor 2']);
-
-                                if (!isNaN(score1) && !isNaN(score2)) {
-                                    existingMatch['Skor 1'] = score1;
-                                    existingMatch['Skor 2'] = score2;
-                                    matchesUpdated++;
-                                }
-                            }
-                        }
-                    });
-
-                    if (matchesUpdated > 0) {
-                        await saveDataToCloud(); // Save updated scores to cloud
-                        showAdminStatus(`${matchesUpdated} pertandingan di Babak ${roundNumber} berhasil diimpor dan diperbarui!`);
-                    } else {
-                        showAdminStatus(`Tidak ada skor yang diperbarui di Babak ${roundNumber}. Pastikan format JSON benar (Match, Skor 1, Skor 2, dll.) dan Babak telah diatur.`, 'red');
-                    }
-
-                } catch (error) {
-                    console.error("Import round data failed:", error);
-                    showAdminStatus(`Gagal mengimpor data Babak ${roundNumber}. Pesan: ${error.message}`, 'red');
-                }
-            };
-            reader.onerror = () => {
-                showAdminStatus('Gagal membaca file.', 'red');
-            };
+            const match = tournamentData[globalMatchIndex];
             
-            reader.readAsText(file);
-        }
+            // Determine which score column to update
+            const scoreKey = teamNumber === 1 ? 'Skor 1' : 'Skor 2';
 
+            // Update the score in the local array
+            match[scoreKey] = score;
+
+            // Save change to cloud/localStorage
+            await saveDataToCloud();
+            
+            // Refresh the UI instantly to update highlights and the standings tab
+            initializeAppUI(false); 
+        }
 
         // --- Rendering Functions ---
 
@@ -823,6 +834,7 @@
             const listContainer = document.getElementById('team-edit-list');
             if (!listContainer) return;
 
+            // Pastikan data tim yang ditampilkan adalah dari liga aktif
             const allTeams = tournamentData.flatMap(m => [m['Tim 1'], m['Tim 2'], m.Bye]).filter(name => name && name !== '');
             const uniqueTeams = [...new Set(allTeams)].sort();
             
@@ -848,13 +860,19 @@
             }).join('');
         }
         
+        /**
+         * Menghitung statistik (Poin, Menang, Kalah, Seri, Gol) untuk semua tim.
+         */
         function calculateStandings() {
             const allTeams = tournamentData.flatMap(m => [m['Tim 1'], m['Tim 2'], m.Bye]).filter(name => name && name !== '');
             const uniqueTeams = [...new Set(allTeams)];
             
             teamStats = {};
             uniqueTeams.forEach(team => {
-                teamStats[team] = { team: team, P: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, PTS: 0, GD: 0 };
+                teamStats[team] = {
+                    team: team,
+                    P: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, PTS: 0, GD: 0
+                };
             });
 
             tournamentData.forEach(match => {
@@ -887,6 +905,9 @@
             return Object.values(teamStats);
         }
 
+        /**
+         * Menggambar ulang data pertandingan berdasarkan filter babak yang dipilih.
+         */
         function renderTournamentData(selectedRound) {
             const container = document.getElementById('tournament-data');
             container.innerHTML = '';
@@ -899,30 +920,16 @@
             }, {});
 
             const roundsToShow = selectedRound === 'all'
-                ? Object.keys(groupedData).map(Number).filter(r => r > 0).sort((a, b) => a - b) 
+                ? Object.keys(groupedData).map(Number).filter(r => r > 0).sort((a, b) => a - b) // Filter out Round 0 (Admin)
                 : [Number(selectedRound)];
             
             roundsToShow.forEach(round => {
                 const matches = groupedData[round];
                 if (!matches || matches.length === 0) return;
 
-                let adminControls = '';
-                if (isAdminLoggedIn) {
-                    adminControls = `
-                        <div class="mb-4 p-3 bg-red-50 rounded-lg border border-red-200 flex flex-col sm:flex-row items-start sm:items-center justify-between">
-                            <span class="text-sm font-semibold text-red-700 mb-2 sm:mb-0">Aksi Admin Babak ${round}:</span>
-                            <label for="import-round-${round}" class="bg-red-600 text-white p-2 rounded-lg font-semibold hover:bg-red-700 transition duration-200 text-xs cursor-pointer shadow-md">
-                                Import Skor Babak (JSON)
-                            </label>
-                            <input type="file" id="import-round-${round}" accept=".json" onchange="importRoundData(event, ${round})" class="hidden">
-                        </div>
-                    `;
-                }
-
                 const roundDiv = document.createElement('div');
                 roundDiv.className = 'bg-white p-4 sm:p-6 rounded-xl shadow-lg';
                 roundDiv.innerHTML = `
-                    ${adminControls}
                     <h2 class="text-2xl font-bold mb-4 text-blue-800 border-b-2 border-blue-600 pb-2">Babak ${round}</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border">
@@ -948,6 +955,9 @@
                 const tableBody = roundDiv.querySelector(`#round-${round}-body`);
 
                 matches.forEach(match => {
+                    // Find the actual index in the global tournamentData array (needed for saving)
+                    const globalIndex = tournamentData.findIndex(m => m === match); 
+
                     let rowHtml = '';
                     
                     if (match.Bye && match.Bye !== '') {
@@ -959,21 +969,46 @@
                             </tr>
                         `;
                     } else if (match['Tim 1'] && match['Tim 2']) {
-                        const score1 = match['Skor 1'] === 0 || match['Skor 1'] ? match['Skor 1'] : '-';
-                        const score2 = match['Skor 2'] === 0 || match['Skor 2'] ? match['Skor 2'] : '-';
+                        const score1 = match['Skor 1'] === 0 || match['Skor 1'] ? match['Skor 1'] : '';
+                        const score2 = match['Skor 2'] === 0 || match['Skor 2'] ? match['Skor 2'] : '';
                         
-                        const isScored = score1 !== '-' && score2 !== '-';
+                        const isScored = score1 !== '' && score2 !== '';
                         const winnerClass1 = isScored && score1 > score2 ? 'font-bold text-green-700' : 'text-gray-700';
                         const winnerClass2 = isScored && score2 > score1 ? 'font-bold text-green-700' : 'text-gray-700';
                         const drawClass = isScored && score1 === score2 ? 'font-bold text-yellow-600' : 'text-gray-500';
+
+                        let scoreInput1, scoreInput2;
+
+                        if (isAdminLoggedIn) {
+                            // Render input fields for admin
+                            scoreInput1 = `
+                                <td class="p-2 text-center">
+                                    <input type="number" value="${score1}" min="0" 
+                                        class="w-12 p-1 border rounded-md text-center text-gray-900 font-bold bg-white focus:ring-red-500 focus:border-red-500"
+                                        onchange="updateScoreInline(${globalIndex}, 1, this.value)"
+                                        onblur="updateScoreInline(${globalIndex}, 1, this.value)">
+                                </td>`;
+                            scoreInput2 = `
+                                <td class="p-2 text-center">
+                                    <input type="number" value="${score2}" min="0" 
+                                        class="w-12 p-1 border rounded-md text-center text-gray-900 font-bold bg-white focus:ring-red-500 focus:border-red-500"
+                                        onchange="updateScoreInline(${globalIndex}, 2, this.value)"
+                                        onblur="updateScoreInline(${globalIndex}, 2, this.value)">
+                                </td>`;
+                        } else {
+                            // Render scores as static text for public view
+                            scoreInput1 = `<td class="p-3 text-base text-gray-900 text-center font-extrabold ${winnerClass1}">${score1 || '-'}</td>`;
+                            scoreInput2 = `<td class="p-3 text-base text-gray-900 text-center font-extrabold ${winnerClass2}">${score2 || '-'}</td>`;
+                        }
+
 
                         rowHtml = `
                             <tr class="hover:bg-gray-50 transition duration-150">
                                 <td class="p-3 text-sm font-medium text-gray-900 text-center">${match.Match}</td>
                                 <td class="p-3 text-sm text-gray-800 font-medium ${winnerClass1}">${match['Tim 1']}</td>
-                                <td class="p-3 text-base text-gray-900 text-center font-extrabold ${winnerClass1}">${score1}</td>
+                                ${scoreInput1}
                                 <td class="p-3 text-sm border-l border-r border-gray-200 text-center ${drawClass}">VS</td>
-                                <td class="p-3 text-base text-gray-900 text-center font-extrabold ${winnerClass2}">${score2}</td>
+                                ${scoreInput2}
                                 <td class="p-3 text-sm text-gray-800 font-medium ${winnerClass2} text-left">${match['Tim 2']}</td>
                                 <td class="p-3 text-sm text-gray-500 text-center">-</td>
                             </tr>
@@ -988,18 +1023,23 @@
             }
         }
 
+        /**
+         * Merender tabel klasemen (Standings).
+         */
         function renderStandings() {
             const container = document.getElementById('standings-data');
             container.innerHTML = '';
             
             const standings = calculateStandings();
             
+            // 1. Urutkan Klasemen (PTS -> GD -> GF)
             standings.sort((a, b) => {
                 if (b.PTS !== a.PTS) return b.PTS - a.PTS;
                 if (b.GD !== a.GD) return b.GD - a.GD;
                 return b.GF - a.GF;
             });
 
+            // 2. Buat HTML Tabel Klasemen
             const tableHtml = `
                 <div class="bg-white p-4 sm:p-6 rounded-xl shadow-lg">
                     <h2 class="text-2xl font-bold mb-4 text-blue-800 border-b-2 border-blue-600 pb-2">Tabel Klasemen (Peringkat)</h2>
@@ -1049,6 +1089,9 @@
             container.innerHTML = tableHtml;
         }
 
+        /**
+         * Fungsi untuk mengganti tampilan tab (Jadwal/Klasemen/Admin)
+         */
         function switchTab(tabName) {
             const tabMatches = document.getElementById('tab-matches');
             const tabStandings = document.getElementById('tab-standings');
@@ -1059,12 +1102,14 @@
             const dataAdmin = document.getElementById('admin-data');
             const filterInfo = document.getElementById('filter-info');
 
+            // Reset tab classes
             const tabs = [tabMatches, tabStandings, tabAdmin].filter(Boolean); 
             tabs.forEach(tab => {
                 tab.classList.remove('active-tab');
                 tab.classList.add('text-gray-700', 'bg-white');
             });
 
+            // Hide all data sections and controls
             [dataMatches, dataStandings, dataAdmin, filterInfo].forEach(el => el.classList.add('hidden'));
 
             if (tabName === 'matches') {
@@ -1094,9 +1139,11 @@
         }
 
 
-        function initializeAppUI(useLocalStorageFallback) {
-            if (useLocalStorageFallback) {
-                // If cloud init failed or doc is empty, load from localStorage/default data
+        /**
+         * Menginisialisasi dropdown filter dan menghitung statistik.
+         */
+        function initializeAppUI(shouldReloadData = true) {
+            if (shouldReloadData) {
                 loadDataFromLocalStorage();
             }
 
@@ -1104,10 +1151,12 @@
             const totalMatchesElement = document.getElementById('total-matches');
             const totalTeamsElement = document.getElementById('total-teams');
 
+            // 1. Tentukan Babak Unik dan Tim
             const uniqueRounds = [...new Set(tournamentData.map(match => match.Babak))].filter(b => b > 0); 
             const allTeams = tournamentData.flatMap(m => [m['Tim 1'], m['Tim 2'], m.Bye]).filter(name => name && name !== '');
             const uniqueTeams = new Set(allTeams);
 
+            // 2. Isi Dropdown Filter 
             filterElement.innerHTML = '<option value="all">Semua Babak</option>';
             uniqueRounds.sort((a, b) => a - b).forEach(round => {
                 const option = document.createElement('option');
@@ -1115,15 +1164,33 @@
                 option.textContent = `Babak ${round}`;
                 filterElement.appendChild(option);
             });
-            filterElement.onchange = (e) => renderTournamentData(e.target.value);
 
-
+            // 3. Hitung Statistik global
             const totalMatches = tournamentData.filter(m => m.Match && m.Match !== '').length;
             totalMatchesElement.textContent = totalMatches;
             totalTeamsElement.textContent = uniqueTeams.size;
 
+            // 4. Render League Selector
             renderLeagueSelector();
-            switchTab('matches');
+            
+            // 5. ATTACH EVENT LISTENERS FOR TABS (Fix for the unclickable tabs bug in this specific file version)
+            document.getElementById('tab-matches').onclick = () => switchTab('matches');
+            document.getElementById('tab-standings').onclick = () => switchTab('standings');
+
+
+            // 6. Render UI awal
+            if (shouldReloadData) {
+                switchTab('matches'); 
+            } else {
+                // Hanya render ulang data jika tidak ada switch tab
+                const currentTab = document.querySelector('.active-tab')?.id.replace('tab-', '') || 'matches';
+                if (currentTab === 'matches') {
+                    const currentFilter = document.getElementById('round-filter').value;
+                    renderTournamentData(currentFilter);
+                } else if (currentTab === 'standings') {
+                    renderStandings();
+                }
+            }
         }
 
         // Jalankan inisialisasi ketika halaman dimuat
