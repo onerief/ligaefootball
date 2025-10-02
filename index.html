@@ -487,24 +487,39 @@
             `;
         };
 
-        window.toggleAdmin = () => {
-            const password = document.getElementById('admin-password').value;
+        // --- FUNGSI MODAL BARU ---
+        
+        window.showAdminModal = () => {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('admin-password-input').focus();
+        };
+
+        window.hideAdminModal = () => {
+            document.getElementById('admin-modal').classList.add('hidden');
+            document.getElementById('admin-password-input').value = '';
+            document.getElementById('admin-login-message').textContent = '';
+        };
+
+        window.authenticateAdmin = () => {
+            const passwordInput = document.getElementById('admin-password-input');
+            const password = passwordInput.value;
+            const message = document.getElementById('admin-login-message');
+
             if (password === ADMIN_PASSWORD) {
+                hideAdminModal(); // Sembunyikan modal
+                
+                // Tampilkan panel admin
                 document.getElementById('admin-panel-placeholder').innerHTML = renderAdminPanel();
-                document.getElementById('admin-login-form').classList.add('hidden');
-                document.getElementById('admin-password').value = ''; // Clear password on success
-                renderApp(leagueData); // Re-render to enable score inputs
+                renderApp(leagueData); // Re-render untuk mengaktifkan input skor
             } else {
-                window.alert("Kata sandi Admin salah.");
-                document.getElementById('admin-password').value = '';
+                message.textContent = 'Kata sandi Admin salah.';
+                passwordInput.value = '';
             }
         };
 
         window.hideAdminPanel = () => {
             document.getElementById('admin-panel-placeholder').innerHTML = '';
-            document.getElementById('admin-password').value = '';
-            document.getElementById('admin-login-form').classList.remove('hidden');
-            renderApp(leagueData); // Re-render to disable score inputs
+            renderApp(leagueData); // Re-render untuk menonaktifkan input skor
         };
 
 
@@ -512,7 +527,7 @@
             const appContainer = document.getElementById('app-container');
             const standings = calculateStandings(data);
             
-            // Set global Admin state based on if the panel is visible
+            // Cek apakah panel admin sedang ditampilkan
             isAdminLoggedIn = document.getElementById('admin-panel-placeholder').innerHTML !== '';
 
             // Render konten utama
@@ -532,7 +547,7 @@
                 <div id="admin-panel-placeholder">${isAdminLoggedIn ? renderAdminPanel() : ''}</div>
             `;
 
-            // If Admin is logged in, ensure the score inputs are visible/enabled
+            // Atur status disabled pada input skor berdasarkan status login
             const scheduleContainer = document.querySelector('.space-y-8');
             if (scheduleContainer) {
                 scheduleContainer.querySelectorAll('input[type="number"], button[onclick^="submitScore"]').forEach(el => {
@@ -565,12 +580,12 @@
                         Menunggu koneksi...
                     </div>
                     
-                    <div id="admin-login-form" class="flex items-center space-x-2">
-                        <input id="admin-password" type="password" placeholder="Kata Sandi Admin" class="p-2 border border-gray-300 rounded-lg text-sm w-32 focus:ring-blue-500 focus:border-blue-500">
-                        <button onclick="toggleAdmin()" class="bg-yellow-500 text-white font-semibold py-2 px-3 rounded-lg shadow-md hover:bg-yellow-600 transition-colors">
-                            Admin
-                        </button>
-                    </div>
+                    <!-- Tombol Admin BARU (Memanggil Modal) -->
+                    <button onclick="showAdminModal()" class="bg-yellow-500 text-white font-semibold py-2 px-3 rounded-lg shadow-md hover:bg-yellow-600 transition-colors">
+                        Admin
+                    </button>
+                    <!-- Tombol Admin LAMA Dihapus -->
+
                 </div>
             </div>
         </header>
@@ -589,6 +604,27 @@
             </div>
         </main>
     </div>
+
+    <!-- Admin Login MODAL (Popup) -->
+    <div id="admin-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Akses Admin</h2>
+            <p class="text-gray-600 mb-6">Masukkan kata sandi admin untuk melanjutkan.</p>
+            <input type="password" id="admin-password-input" 
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 mb-4" 
+                   placeholder="Kata Sandi">
+            <p id="admin-login-message" class="text-red-500 text-sm mb-4"></p>
+            <div class="flex space-x-3">
+                <button onclick="authenticateAdmin()" class="flex-grow bg-red-600 text-white p-3 rounded-lg font-semibold hover:bg-red-700 transition duration-200">
+                    Masuk
+                </button>
+                <button onclick="hideAdminModal()" class="bg-gray-300 text-gray-800 p-3 rounded-lg font-semibold hover:bg-gray-400 transition duration-200">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- END Admin Login MODAL -->
 
 </body>
 </html>
