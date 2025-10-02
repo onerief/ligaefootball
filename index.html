@@ -517,10 +517,14 @@
         
         // --- Fungsi Render UI ---
 
+        // Fungsi status koneksi dihilangkan dari UI
         const updateConnectionStatus = (isSuccess, message) => {
-            const statusEl = document.getElementById('connection-status');
-            statusEl.textContent = message;
-            statusEl.className = `p-2 rounded-lg text-sm font-medium transition-colors duration-300 ${isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            // Logging ke console saja
+            if (!isSuccess) {
+                console.error(`[CLOUD STATUS ERROR] ${message}`);
+            } else {
+                console.log(`[CLOUD STATUS] ${message}`);
+            }
         };
 
         const renderStandings = (standings) => {
@@ -988,9 +992,6 @@
                     <span class="text-yellow-300">Liga EFootball</span>
                 </h1>
                 <div class="flex items-center space-x-2">
-                    <div id="connection-status" class="p-1 rounded-lg text-xs font-medium bg-yellow-100 text-yellow-700 transition-colors duration-300">
-                        Menunggu koneksi...
-                    </div>
                     
                     <!-- Tombol Admin BARU (Memanggil Modal) -->
                     <button onclick="showAdminModal()" class="bg-yellow-500 text-white font-semibold py-1 px-3 rounded-lg shadow-md hover:bg-yellow-600 transition-colors text-xs">
