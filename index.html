@@ -48,6 +48,11 @@
             padding: 2px;
             border: 1px solid #ccc;
         }
+        /* Penyesuaian padding tabel untuk kepadatan lebih tinggi */
+        .dense-table th, .dense-table td {
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
     </style>
 </head>
 <body>
@@ -512,16 +517,16 @@
             return `
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Klasemen Liga</h2>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 dense-table">
                         <thead>
                             <tr class="table-header text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 <th class="py-2 px-3 rounded-tl-lg">#</th>
                                 <th class="py-2 px-3">Klub</th>
-                                <th class="py-2 px-3 hidden sm:table-cell">M</th>
-                                <th class="py-2 px-3 hidden sm:table-cell">S</th>
-                                <th class="py-2 px-3 hidden sm:table-cell">K</th>
-                                <th class="py-2 px-3 hidden sm:table-cell">GM</th>
-                                <th class="py-2 px-3 hidden sm:table-cell">GK</th>
+                                <th class="py-2 px-3">M</th>
+                                <th class="py-2 px-3">S</th>
+                                <th class="py-2 px-3">K</th>
+                                <th class="py-2 px-3">GM</th>
+                                <th class="py-2 px-3">GK</th>
                                 <th class="py-2 px-3">P</th>
                                 <th class="py-2 px-3">SG</th>
                                 <th class="py-2 px-3 rounded-tr-lg">Poin</th>
@@ -532,11 +537,11 @@
                                 <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors">
                                     <td class="py-2 px-3 font-medium">${index + 1}</td>
                                     <td class="py-2 px-3 font-semibold text-gray-900">${team.name}</td>
-                                    <td class="py-2 px-3 hidden sm:table-cell">${team.wins}</td>
-                                    <td class="py-2 px-3 hidden sm:table-cell">${team.draws}</td>
-                                    <td class="py-2 px-3 hidden sm:table-cell">${team.losses}</td>
-                                    <td class="py-2 px-3 hidden sm:table-cell">${team.goalsFor}</td>
-                                    <td class="py-2 px-3 hidden sm:table-cell">${team.goalsAgainst}</td>
+                                    <td class="py-2 px-3">${team.wins}</td>
+                                    <td class="py-2 px-3">${team.draws}</td>
+                                    <td class="py-2 px-3">${team.losses}</td>
+                                    <td class="py-2 px-3">${team.goalsFor}</td>
+                                    <td class="py-2 px-3">${team.goalsAgainst}</td>
                                     <td class="py-2 px-3">${team.played}</td>
                                     <td class="py-2 px-3 font-bold ${team.diff > 0 ? 'text-green-600' : team.diff < 0 ? 'text-red-600' : 'text-gray-500'}">${team.diff}</td>
                                     <td class="py-2 px-3 text-lg font-extrabold text-blue-600">${team.points}</td>
@@ -547,7 +552,6 @@
                 </div>
                 <p class="text-xs text-gray-500 mt-4">
                     Keterangan: P=Main, M=Menang, S=Seri, K=Kalah, GM=Gol Memasukkan, GK=Gol Kemasukan, SG=Selisih Gol, Poin=Poin.
-                    <br/>Kolom M, S, K, GM, GK disembunyikan di layar HP agar tabel lebih ringkas.
                 </p>
             `;
         };
@@ -570,13 +574,13 @@
                         <div class="border-b pb-4">
                             <h3 class="text-xl font-bold text-gray-700 mb-3 border-l-4 border-blue-500 pl-2">Babak ${babak}</h3>
                             <div class="overflow-x-auto w-full">
-                                <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border">
+                                <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border dense-table">
                                     <thead class="table-header">
                                         <tr class="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                            <th class="py-2 px-3">#</th>
-                                            <th class="py-2 px-3 text-left">Tim Kandang</th>
-                                            <th class="py-2 px-3 text-center" colspan="3">Skor</th>
-                                            <th class="py-2 px-3 text-right">Tim Tandang</th>
+                                            <th class="py-2 px-3 w-8">#</th>
+                                            <th class="py-2 px-3 text-left w-1/3">Tim Kandang</th>
+                                            <th class="py-2 px-3 text-center" colspan="3" style="min-width: 80px;">Skor</th>
+                                            <th class="py-2 px-3 text-right w-1/3">Tim Tandang</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-100">
@@ -588,14 +592,6 @@
                                             const homeScoreDisplay = match.homeScore !== null ? match.homeScore : '';
                                             const awayScoreDisplay = match.awayScore !== null ? match.awayScore : '';
                                             
-                                            // Status class for the badge
-                                            let statusClass = 'text-sm font-medium ';
-                                            if (isFinished) {
-                                                statusClass += 'text-blue-500'; 
-                                            } else {
-                                                statusClass += 'text-gray-500';
-                                            }
-
                                             // LOGIC FOR WINNER/LOSER COLORING
                                             let homeNameClass = 'text-gray-900';
                                             let awayNameClass = 'text-gray-900';
@@ -623,8 +619,8 @@
                                                 : `<span class="text-base font-extrabold ${awayNameClass}">${awayScoreDisplay || '-'}</span>`;
                                             
                                             const adminSaveButtonRow = isAdminLoggedIn ? 
-                                                `<tr class="bg-gray-50 border-t border-gray-200"><td colspan="6" class="p-2 text-center">
-                                                    <button onclick="submitScore(${globalIndex})" class="btn-primary text-white font-semibold py-1 px-3 rounded-lg text-sm transition duration-200 shadow-sm">
+                                                `<tr class="bg-gray-50 border-t border-gray-200"><td colspan="6" class="py-1 px-2 text-center">
+                                                    <button onclick="submitScore(${globalIndex})" class="btn-primary text-white font-semibold py-1 px-3 rounded-lg text-xs transition duration-200 shadow-sm w-full">
                                                         Simpan Skor Match ${match.match || 'N/A'}
                                                     </button>
                                                 </td></tr>` : '';
@@ -633,11 +629,11 @@
                                             return `
                                                 <tr class="hover:bg-gray-50 transition-colors">
                                                     <td class="py-2 px-3 text-sm font-medium text-center text-gray-600">${match.match || 'N/A'}</td>
-                                                    <td class="py-2 px-3 text-sm ${homeNameClass} font-semibold text-left">${match.home}</td>
+                                                    <td class="py-2 px-3 text-sm ${homeNameClass} font-semibold text-left whitespace-nowrap">${match.home}</td>
                                                     <td class="admin-input-cell text-center">${homeScoreCell}</td>
                                                     <td class="py-2 px-1 text-center font-bold text-gray-500 text-sm">vs</td>
                                                     <td class="admin-input-cell text-center">${awayScoreCell}</td>
-                                                    <td class="py-2 px-3 text-sm ${awayNameClass} font-semibold text-right">${match.away}</td>
+                                                    <td class="py-2 px-3 text-sm ${awayNameClass} font-semibold text-right whitespace-nowrap">${match.away}</td>
                                                 </tr>
                                                 ${adminSaveButtonRow}
                                             `;
