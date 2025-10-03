@@ -163,7 +163,7 @@
                     points: 0, played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, diff: 0 
                 })),
                 schedule: rawData,
-                title: 'Way Kanan EFootball League'
+                title: 'Way Kanan EFootball League' // <-- JUDUL BARU DI SINI
             };
         };
         
@@ -667,9 +667,10 @@
                                                 }
                                             }
 
-                                            // --- FIX: Change || '-' to explicit check for '' ---
-                                            const homeScoreTampil = homeScoreDisplay === '' ? '-' : homeScoreDisplay;
-                                            const awayScoreTampil = awayScoreDisplay === '' ? '-' : awayScoreDisplay;
+                                            // --- FIX: Logic to correctly display 0 or '-' ---
+                                            // Tampilkan 0 jika skor adalah 0, jika tidak ada skor (null), tampilkan '-'
+                                            const homeScoreTampil = match.homeScore !== null ? match.homeScore : '-';
+                                            const awayScoreTampil = match.awayScore !== null ? match.awayScore : '-';
                                             // --- END FIX ---
 
 
@@ -874,7 +875,7 @@
         
         const renderAdminPanel = (data) => {
             const lastUpdated = data?.lastUpdated ? new Date(data.lastUpdated).toLocaleString('id-ID') : 'Belum pernah diupdate';
-            const leagueTitle = data.title || 'Liga EFootball'; 
+            const leagueTitle = data.title || 'Way Kanan EFootball League'; // <-- JUDUL BARU
 
             return `
                 <div id="admin-panel" class="card admin-section mt-10 p-6">
@@ -1041,7 +1042,7 @@
         <header class="header-bg py-3 mb-4"> <!-- Reduced padding/margin -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                 <h1 class="text-2xl font-extrabold text-white tracking-tight">
-                    <span class="text-yellow-300">Liga EFootball</span>
+                    <span class="text-yellow-300">Way Kanan EFootball League</span> <!-- JUDUL BARU DI HEADER -->
                 </h1>
                 <div class="flex items-center space-x-2">
                     
