@@ -471,7 +471,8 @@
             const standingsMap = new Map(data.teams.map(team => [team.name, { ...team, points: 0, played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, diff: 0 }]));
 
             data.schedule.forEach(match => {
-                if (match.homeScore !== null && match.awayScore !== null) {
+                // Hanya hitung jika skor diisi dan tim ada, dan bukan BYE
+                if (match.homeScore !== null && match.awayScore !== null && match.home && match.away) {
                     const homeTeam = standingsMap.get(match.home);
                     const awayTeam = standingsMap.get(match.away);
 
@@ -666,13 +667,19 @@
                                                 }
                                             }
 
+                                            // --- FIX: Change || '-' to explicit check for '' ---
+                                            const homeScoreTampil = homeScoreDisplay === '' ? '-' : homeScoreDisplay;
+                                            const awayScoreTampil = awayScoreDisplay === '' ? '-' : awayScoreDisplay;
+                                            // --- END FIX ---
+
+
                                             // Determine content for the score cells
                                             const homeScoreCell = isAdminLoggedIn
                                                 ? `<input id="home-score-${globalIndex}" type="number" min="0" value="${homeScoreDisplay}" placeholder="0" class="admin-input-score font-bold text-center">`
-                                                : `<span class="font-bold ${homeNameClass}">${homeScoreDisplay || '-'}</span>`;
+                                                : `<span class="font-bold ${homeNameClass}">${homeScoreTampil}</span>`;
                                             const awayScoreCell = isAdminLoggedIn
                                                 ? `<input id="away-score-${globalIndex}" type="number" min="0" value="${awayScoreDisplay}" placeholder="0" class="admin-input-score font-bold text-center">`
-                                                : `<span class="font-bold ${awayNameClass}">${awayScoreDisplay || '-'}</span>`;
+                                                : `<span class="font-bold ${awayNameClass}">${awayScoreTampil}</span>`;
                                             
                                             const adminSaveButtonRow = isAdminLoggedIn ? 
                                                 `<tr class="bg-gray-50 border-t border-gray-200"><td colspan="6" class="py-1 px-2 text-center">
