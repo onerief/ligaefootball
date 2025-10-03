@@ -96,51 +96,60 @@
         // --- DATA JADWAL ASLI PENGGUNA (9 TIM) ---
         const getOriginalInitialData = () => {
             const rawData = [
-                // Babak 1
+                // Pekan 1
                 { home: 'Arief', away: 'Dexulmantap', homeScore: 3, awayScore: 2, status: 'Finished', babak: 1, match: 1 },
-                { home: 'Bayu', away: 'Ptangpteng', homeScore: 2, away: 'Ptangpteng', awayScore: 3, status: 'Finished', babak: 1, match: 2 },
+                { home: 'Bayu', away: 'Ptangpteng', homeScore: 2, awayScore: 3, status: 'Finished', babak: 1, match: 2 },
                 { home: 'Tuku Pulsa Tsel', away: 'Gusmurtad', homeScore: 3, awayScore: 4, status: 'Finished', babak: 1, match: 3 },
                 { home: 'The Familia FC', away: 'Riders', homeScore: 0, awayScore: 3, status: 'Finished', babak: 1, match: 4 },
-                // Babak 2
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 1, match: null, byeTeam: 'Ipangopen' }, // BYE ENTRY
+                // Pekan 2
                 { home: 'Ipangopen', away: 'Riders', homeScore: 8, awayScore: 2, status: 'Finished', babak: 2, match: 5 },
                 { home: 'Arief', away: 'Gusmurtad', homeScore: 3, awayScore: 3, status: 'Finished', babak: 2, match: 6 },
                 { home: 'Ptangpteng', away: 'Tuku Pulsa Tsel', homeScore: 2, awayScore: 1, status: 'Finished', babak: 2, match: 7 },
                 { home: 'Dexulmantap', away: 'The Familia FC', homeScore: 3, awayScore: 6, status: 'Finished', babak: 2, match: 8 },
-                // Babak 3 (dst - skor null)
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 2, match: null, byeTeam: 'Bayu' }, // BYE ENTRY
+                // Pekan 3 (dst - skor null)
                 { home: 'Ipangopen', away: 'Arief', homeScore: null, awayScore: null, status: 'Scheduled', babak: 3, match: 9 },
                 { home: 'Bayu', away: 'Gusmurtad', homeScore: null, awayScore: null, status: 'Scheduled', babak: 3, match: 10 },
                 { home: 'Ptangpteng', away: 'Riders', homeScore: null, awayScore: null, status: 'Scheduled', babak: 3, match: 11 },
                 { home: 'Tuku Pulsa Tsel', away: 'The Familia FC', homeScore: null, awayScore: null, status: 'Scheduled', babak: 3, match: 12 },
-                // Babak 4
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 3, match: null, byeTeam: 'Dexulmantap' }, // BYE ENTRY
+                // Pekan 4
                 { home: 'Ipangopen', away: 'Bayu', homeScore: null, awayScore: null, status: 'Scheduled', babak: 4, match: 13 },
                 { home: 'Arief', away: 'Ptangpteng', homeScore: null, awayScore: null, status: 'Scheduled', babak: 4, match: 14 },
                 { home: 'Gusmurtad', away: 'The Familia FC', homeScore: null, awayScore: null, status: 'Scheduled', babak: 4, match: 15 },
                 { home: 'Dexulmantap', away: 'Riders', homeScore: null, awayScore: null, status: 'Scheduled', babak: 4, match: 16 },
-                // Babak 5
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 4, match: null, byeTeam: 'Tuku Pulsa Tsel' }, // BYE ENTRY
+                // Pekan 5
                 { home: 'Ipangopen', away: 'Ptangpteng', homeScore: null, awayScore: null, status: 'Scheduled', babak: 5, match: 17 },
                 { home: 'Bayu', away: 'The Familia FC', homeScore: null, awayScore: null, status: 'Scheduled', babak: 5, match: 18 },
                 { home: 'Arief', away: 'Tuku Pulsa Tsel', homeScore: null, awayScore: null, status: 'Scheduled', babak: 5, match: 19 },
                 { home: 'Gusmurtad', away: 'Dexulmantap', homeScore: null, awayScore: null, status: 'Scheduled', babak: 5, match: 20 },
-                // Babak 6
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 5, match: null, byeTeam: 'Riders' }, // BYE ENTRY
+                // Pekan 6
                 { home: 'Ipangopen', away: 'Tuku Pulsa Tsel', homeScore: null, awayScore: null, status: 'Scheduled', babak: 6, match: 21 },
                 { home: 'Bayu', away: 'Dexulmantap', homeScore: null, awayScore: null, status: 'Scheduled', babak: 6, match: 22 },
                 { home: 'Ptangpteng', away: 'Gusmurtad', homeScore: null, awayScore: null, status: 'Scheduled', babak: 6, match: 23 },
                 { home: 'Riders', away: 'Arief', homeScore: null, awayScore: null, status: 'Scheduled', babak: 6, match: 24 },
-                // Babak 7
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 6, match: null, byeTeam: 'The Familia FC' }, // BYE ENTRY
+                // Pekan 7
                 { home: 'Ipangopen', away: 'Gusmurtad', homeScore: null, awayScore: null, status: 'Scheduled', babak: 7, match: 25 },
                 { home: 'Bayu', away: 'Tuku Pulsa Tsel', homeScore: null, awayScore: null, status: 'Scheduled', babak: 7, match: 26 },
                 { home: 'Ptangpteng', away: 'The Familia FC', homeScore: null, awayScore: null, status: 'Scheduled', babak: 7, match: 27 },
                 { home: 'Riders', away: 'Dexulmantap', homeScore: null, awayScore: null, status: 'Scheduled', babak: 7, match: 28 },
-                // Babak 8
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 7, match: null, byeTeam: 'Arief' }, // BYE ENTRY
+                // Pekan 8
                 { home: 'Ipangopen', away: 'The Familia FC', homeScore: null, awayScore: null, status: 'Scheduled', babak: 8, match: 29 },
                 { home: 'Bayu', away: 'Arief', homeScore: null, awayScore: null, status: 'Scheduled', babak: 8, match: 30 },
                 { home: 'Ptangpteng', away: 'Dexulmantap', homeScore: null, awayScore: null, status: 'Scheduled', babak: 8, match: 31 },
                 { home: 'Tuku Pulsa Tsel', away: 'Riders', homeScore: null, awayScore: null, status: 'Scheduled', babak: 8, match: 32 },
-                // Babak 9
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 8, match: null, byeTeam: 'Gusmurtad' }, // BYE ENTRY
+                // Pekan 9
                 { home: 'Ipangopen', away: 'Dexulmantap', homeScore: null, awayScore: null, status: 'Scheduled', babak: 9, match: 33 },
                 { home: 'Bayu', away: 'Riders', homeScore: null, awayScore: null, status: 'Scheduled', babak: 9, match: 34 },
                 { home: 'Ptangpteng', away: 'Arief', homeScore: null, awayScore: null, status: 'Scheduled', babak: 9, match: 35 },
-                { home: 'Tuku Pulsa Tsel', away: 'Gusmurtad', homeScore: null, awayScore: null, status: 'Scheduled', babak: 9, match: 36 }
+                { home: 'Tuku Pulsa Tsel', away: 'Gusmurtad', homeScore: null, awayScore: null, status: 'Scheduled', babak: 9, match: 36 },
+                { home: null, away: null, homeScore: null, awayScore: null, status: 'Bye', babak: 9, match: null, byeTeam: 'The Familia FC' } // BYE ENTRY
             ];
 
             const teams = [
@@ -220,26 +229,32 @@
 
                 // Pertandingan yang melibatkan tim Pivot/BYE
                 const pivotOpponent = rotationTeams[rotationTeams.length - 1];
+                const tempMatch = {
+                    homeScore: null,
+                    awayScore: null,
+                    status: 'Scheduled',
+                    babak: round,
+                    match: matchCounter
+                };
+
                 if (pivotOpponent === 'BYE') {
                     // Tim Pivot mendapat BYE
-                    // Tidak ada pertandingan yang dicatat jika BYE
+                    roundMatches.push({ ...tempMatch, status: 'Bye', match: null, byeTeam: teamPivot });
+
                 } else if (teamPivot === 'BYE') {
                     // Tim lawan mendapat BYE
-                    // Tidak ada pertandingan yang dicatat jika BYE
+                    roundMatches.push({ ...tempMatch, status: 'Bye', match: null, byeTeam: pivotOpponent });
                 } else {
                     // Tim Pivot bermain melawan tim terakhir dalam rotasi
                     // Aturan sederhana: Pivot bermain kandang di babak ganjil, tandang di babak genap
                     const isPivotHome = round % 2 === 1;
 
                     roundMatches.push({
+                        ...tempMatch,
                         home: isPivotHome ? teamPivot : pivotOpponent,
                         away: isPivotHome ? pivotOpponent : teamPivot,
-                        homeScore: null,
-                        awayScore: null,
-                        status: 'Scheduled',
-                        babak: round,
-                        match: matchCounter++
                     });
+                    matchCounter++;
                 }
                 
                 matches.push(...roundMatches);
@@ -601,7 +616,7 @@
                 <div class="space-y-4">
                     ${babakKeys.map(babak => `
                         <div class="border-b pb-2">
-                            <h3 class="text-base font-bold text-gray-700 mb-2 border-l-4 border-blue-500 pl-2">Babak ${babak}</h3>
+                            <h3 class="text-base font-bold text-gray-700 mb-2 border-l-4 border-blue-500 pl-2">Pekan ${babak}</h3>
                             <div class="overflow-x-auto w-full">
                                 <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden border dense-table text-xs">
                                     <thead class="table-header">
@@ -614,6 +629,19 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-100">
                                         ${groupedSchedule[babak].map((match, index) => {
+                                            
+                                            // --- BYE CHECK ---
+                                            if (match.status === 'Bye' && match.byeTeam) {
+                                                return `
+                                                    <tr>
+                                                        <td colspan="6" class="bg-yellow-100 text-yellow-800 text-center font-bold py-1 px-2 whitespace-nowrap">
+                                                            TIDAK BERMAIN (BYE): ${match.byeTeam}
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                            }
+                                            // --- END BYE CHECK ---
+
                                             // Calculate global index to save to the main schedule array
                                             const globalIndex = leagueData.schedule.findIndex(m => m.home === match.home && m.away === match.away && m.babak === match.babak);
                                             
