@@ -11,19 +11,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --accent: #e74c3c;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-            --win: #27ae60;
-            --draw: #f39c12;
-            --loss: #c0392b;
+            --primary: #007BFF;
+            --secondary: #6c757d;
+            --accent: #DC3545;
+            --light: #f8f9fa;
+            --dark: #FFFFFF;
+            --win: #28A745;
+            --draw: #FFC107;
+            --loss: #DC3545;
         }
         
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
+            background-color: var(--light);
             color: #333;
         }
         
@@ -33,11 +33,12 @@
         
         .horizontal-menu {
             background-color: var(--dark);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
         
         .horizontal-menu .nav-link {
-            color: rgba(255, 255, 255, 0.8);
+            color: #495057;
+            font-weight: 500;
             padding: 12px 20px;
             margin: 0 5px;
             border-radius: 5px;
@@ -45,7 +46,7 @@
         }
         
         .horizontal-menu .nav-link:hover, .horizontal-menu .nav-link.active {
-            background-color: var(--secondary);
+            background-color: var(--primary);
             color: white;
         }
         
@@ -69,23 +70,24 @@
         }
         
         .btn-primary {
-            background-color: var(--secondary);
-            border-color: var(--secondary);
+            background-color: var(--primary);
+            border-color: var(--primary);
         }
         
         .btn-primary:hover {
-            background-color: #2980b9;
-            border-color: #2980b9;
+            background-color: #0069d9;
+            border-color: #0062cc;
         }
         
         .btn-warning {
-            background-color: #f39c12;
-            border-color: #f39c12;
+            background-color: var(--draw);
+            border-color: var(--draw);
+            color: #212529;
         }
         
         .btn-warning:hover {
-            background-color: #e67e22;
-            border-color: #e67e22;
+            background-color: #e0a800;
+            border-color: #d39e00;
         }
         
         .btn-danger {
@@ -94,8 +96,8 @@
         }
         
         .btn-success {
-            background-color: #27ae60;
-            border-color: #27ae60;
+            background-color: var(--win);
+            border-color: var(--win);
         }
         
         .league-logo, .team-logo {
@@ -108,7 +110,7 @@
         }
         
         .match-card {
-            border-left: 4px solid var(--secondary);
+            border-left: 4px solid var(--primary);
             transition: transform 0.2s;
             padding: 0.5rem 0.75rem;
         }
@@ -141,15 +143,16 @@
         }
         
         .team-item:hover, .league-item:hover {
-            background-color: #f8f9fa;
+            background-color: #f1f1f1;
         }
         
         .round-title {
-            background-color: var(--light);
+            background-color: #e9ecef;
             padding: 10px;
             border-radius: 5px;
             margin: 15px 0;
             font-weight: bold;
+            color: #495057;
         }
         
         .action-buttons {
@@ -163,8 +166,8 @@
         }
         
         .admin-guide {
-            background-color: #e8f4fc;
-            border-left: 4px solid var(--secondary);
+            background-color: #e7f3ff;
+            border-left: 4px solid var(--primary);
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 5px;
@@ -189,6 +192,23 @@
         
         .stats-card:hover {
             transform: translateY(-5px);
+        }
+
+        .stat-detail-card .card-body {
+            padding: 1rem;
+        }
+        .stat-detail-card h6 {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+        .stat-detail-card .team-info {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .stat-detail-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
         }
         
         .login-container {
@@ -295,6 +315,23 @@
         .team-draw {
             font-weight: 600;
         }
+        
+        .score-winner {
+            color: var(--win);
+            font-weight: 700;
+        }
+        .score-loser {
+            color: #95a5a6;
+        }
+        .score-draw {
+            color: var(--draw);
+            font-weight: 600;
+        }
+        .match-league-info {
+            font-size: 0.65rem;
+            color: #7f8c8d;
+            line-height: 1;
+        }
 
         .match-card .text-truncate {
             font-size: 0.85rem;
@@ -369,11 +406,6 @@
             <div id="public-dashboard" class="tab-content">
                 <h2 class="mb-4">Dasbor Liga eFootball</h2>
                 
-                <div class="admin-guide">
-                    <h5><i class="fas fa-info-circle me-2"></i>Informasi Liga</h5>
-                    <p>Selamat datang di portal Liga eFootball. Di sini Anda dapat melihat informasi tentang liga, tim, dan jadwal pertandingan.</p>
-                </div>
-                
                 <div class="row">
                     <div class="col-md-4">
                         <div class="card text-center stats-card">
@@ -402,6 +434,10 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="row mt-3" id="public-stats-details">
+                    <!-- Statistik detail akan dimuat di sini oleh JS -->
                 </div>
                 
                 <div class="row mt-4">
@@ -553,18 +589,6 @@
             <div id="dashboard" class="tab-content">
                 <h2 class="mb-4">Dasbor Liga eFootball - Panel Admin</h2>
                 
-                <div class="admin-guide">
-                    <h5><i class="fas fa-info-circle me-2"></i>Panduan Panel Admin</h5>
-                    <p>Gunakan menu di atas untuk mengelola liga, tim, dan jadwal pertandingan:</p>
-                    <ul>
-                        <li><strong>Kelola Liga</strong> - Untuk menambah, mengedit, atau menghapus liga</li>
-                        <li><strong>Kelola Tim</strong> - Untuk menambah, mengedit, atau menghapus tim</li>
-                        <li><strong>Jadwal Tanding</strong> - Untuk membuat jadwal liga dengan sistem round robin</li>
-                        <li><strong>Input Skor</strong> - Untuk memasukkan hasil pertandingan dan memperbarui klasemen</li>
-                        <li><strong>Klasemen</strong> - Untuk melihat klasemen liga saat ini</li>
-                    </ul>
-                </div>
-                
                 <div class="row">
                     <div class="col-md-3">
                         <div class="card text-center stats-card">
@@ -602,6 +626,10 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="row mt-3" id="admin-stats-details">
+                    <!-- Statistik detail akan dimuat di sini oleh JS -->
                 </div>
                 
                 <div class="row mt-4">
@@ -704,6 +732,7 @@
                     <ul>
                         <li>Pilih liga dari dropdown untuk melihat jadwal</li>
                         <li>Klik <strong>"Buat Jadwal"</strong> untuk membuat jadwal round robin kandang-tandang</li>
+                        <li>Klik tombol <strong>Edit</strong> (ikon pensil) pada setiap pertandingan untuk mengubahnya secara manual</li>
                         <li>Pastikan liga memiliki setidaknya 2 tim sebelum membuat jadwal</li>
                     </ul>
                 </div>
@@ -911,6 +940,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Edit Schedule Modal -->
+        <div class="modal fade" id="editScheduleModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Jadwal Pertandingan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editScheduleForm">
+                            <input type="hidden" id="editMatchId">
+                            <div class="mb-3">
+                                <label for="editHomeTeam" class="form-label">Tim Kandang</label>
+                                <select class="form-select" id="editHomeTeam" required></select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editAwayTeam" class="form-label">Tim Tandang</label>
+                                <select class="form-select" id="editAwayTeam" required></select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editMatchRound" class="form-label">Putaran</label>
+                                <input type="number" class="form-control" id="editMatchRound" min="1" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary" id="updateScheduleBtn">Update Jadwal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -993,6 +1055,7 @@
         const updateTeamBtn = document.getElementById('updateTeamBtn');
         const generateScheduleBtn = document.getElementById('generateScheduleBtn');
         const logoutBtn = document.getElementById('logoutBtn');
+        const updateScheduleBtn = document.getElementById('updateScheduleBtn');
         
         // Kredensial Admin
         const adminEmail = 'admin@ligafun.com';
@@ -1026,14 +1089,17 @@
         // Listener data real-time dari Firestore
         onSnapshot(leaguesCol, (snapshot) => {
             leagues = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Logika untuk Tampilan Default
+            // Logika untuk Tampilan Default: liga terbaru akan menjadi default
             if (leagues.length > 0) {
-                const firstLeagueId = leagues[0].id;
-                if (publicStandingsLeagueSelect.value === '') publicStandingsLeagueSelect.value = firstLeagueId;
-                if (publicScheduleLeagueSelect.value === '') publicScheduleLeagueSelect.value = firstLeagueId;
-                if (scheduleLeagueSelect.value === '') scheduleLeagueSelect.value = firstLeagueId;
-                if (inputScoresLeagueSelect.value === '') inputScoresLeagueSelect.value = firstLeagueId;
-                if (standingsLeagueSelect.value === '') standingsLeagueSelect.value = firstLeagueId;
+                // Urutkan berdasarkan ID (Firestore auto-ID bersifat kronologis)
+                const sortedLeagues = [...leagues].sort((a, b) => b.id.localeCompare(a.id));
+                const recentLeagueId = sortedLeagues[0].id;
+
+                if (publicStandingsLeagueSelect.value === '') publicStandingsLeagueSelect.value = recentLeagueId;
+                if (publicScheduleLeagueSelect.value === '') publicScheduleLeagueSelect.value = recentLeagueId;
+                if (scheduleLeagueSelect.value === '') scheduleLeagueSelect.value = recentLeagueId;
+                if (inputScoresLeagueSelect.value === '') inputScoresLeagueSelect.value = recentLeagueId;
+                if (standingsLeagueSelect.value === '') standingsLeagueSelect.value = recentLeagueId;
             }
             refreshAllDisplays();
         });
@@ -1124,7 +1190,7 @@
             }
         });
         
-        // Navigasi tab (tidak berubah)
+        // Navigasi tab
         document.querySelectorAll('#publicView .horizontal-menu .nav-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -1133,6 +1199,12 @@
                 document.querySelectorAll('#publicView .tab-content').forEach(tab => tab.classList.add('hidden'));
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(tabId).classList.remove('hidden');
+
+                if (tabId === 'public-standings') {
+                    displayPublicStandings();
+                } else if (tabId === 'public-schedule') {
+                    displayPublicSchedule();
+                }
             });
         });
         
@@ -1144,6 +1216,14 @@
                 document.querySelectorAll('#adminPanel .tab-content').forEach(tab => tab.classList.add('hidden'));
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(tabId).classList.remove('hidden');
+
+                if (tabId === 'standings') {
+                    displayStandings();
+                } else if (tabId === 'schedule') {
+                    displaySchedule();
+                } else if (tabId === 'input-scores') {
+                    displayInputScores();
+                }
             });
         });
 
@@ -1155,6 +1235,7 @@
             publicLeagueCount.textContent = leagues.length;
             publicTeamCount.textContent = teams.length;
             publicMatchCount.textContent = matches.length;
+            displayDashboardStats();
         }
         
         function displayPublicActiveLeagues() {
@@ -1189,7 +1270,10 @@
             upcomingMatches.forEach(match => {
                 const homeTeam = teams.find(team => team.id === match.homeTeamId);
                 const awayTeam = teams.find(team => team.id === match.awayTeamId);
+                const league = leagues.find(l => l.id === match.leagueId);
                 if (!homeTeam || !awayTeam) return;
+
+                const leagueInfoHtml = league ? `<div class="match-league-info">${league.name}</div>` : '';
                 const matchElement = document.createElement('div');
                 matchElement.className = 'match-card card mb-3';
                 matchElement.innerHTML = `
@@ -1198,7 +1282,11 @@
                             ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             <span class="home-team text-truncate">${homeTeam.name}</span>
                         </div>
-                        <div class="text-center col-2"><div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small></div>
+                        <div class="text-center col-2">
+                            <div class="match-separator">VS</div>
+                            ${leagueInfoHtml}
+                            <small class="text-muted">P ${match.round}</small>
+                        </div>
                         <div class="d-flex align-items-center justify-content-end col-5">
                             <span class="away-team text-truncate">${awayTeam.name}</span>
                             ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
@@ -1211,7 +1299,11 @@
         function populatePublicLeagueSelect(selectElement) {
             const selectedValue = selectElement.value;
             selectElement.innerHTML = '<option value="">Pilih Liga</option>';
-            leagues.forEach(league => {
+            
+            // Urutkan liga agar yang terbaru di atas
+            const sortedLeagues = [...leagues].sort((a, b) => b.id.localeCompare(a.id));
+
+            sortedLeagues.forEach(league => {
                 const option = document.createElement('option');
                 option.value = league.id;
                 option.textContent = league.name;
@@ -1291,24 +1383,34 @@
                 rounds[round].forEach(match => {
                      const homeTeam = teams.find(team => team.id === match.homeTeamId);
                     const awayTeam = teams.find(team => team.id === match.awayTeamId);
+                    const league = leagues.find(l => l.id === match.leagueId);
                     if (!homeTeam || !awayTeam) return;
 
                     let homeTeamClass = 'home-team';
                     let awayTeamClass = 'away-team';
-                    let resultHtml = `<div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small>`;
+                    let homeScoreClass = '';
+                    let awayScoreClass = '';
+                    const leagueInfoHtml = league ? `<div class="match-league-info">${league.name}</div>` : '';
+                    let resultHtml = `<div class="match-separator">VS</div>${leagueInfoHtml}<small class="text-muted">P ${match.round}</small>`;
 
                     if (match.homeScore !== null && match.awayScore !== null) {
-                        resultHtml = `<div class="match-separator">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
                         if (match.homeScore > match.awayScore) {
                             homeTeamClass = 'team-winner';
                             awayTeamClass = 'team-loser';
+                            homeScoreClass = 'score-winner';
+                            awayScoreClass = 'score-loser';
                         } else if (match.homeScore < match.awayScore) {
                             homeTeamClass = 'team-loser';
                             awayTeamClass = 'team-winner';
+                            homeScoreClass = 'score-loser';
+                            awayScoreClass = 'score-winner';
                         } else {
                             homeTeamClass = 'team-draw';
                             awayTeamClass = 'team-draw';
+                            homeScoreClass = 'score-draw';
+                            awayScoreClass = 'score-draw';
                         }
+                        resultHtml = `<div class="match-separator"><span class="${homeScoreClass}">${match.homeScore}</span> - <span class="${awayScoreClass}">${match.awayScore}</span></div>${leagueInfoHtml}<small class="text-muted">P ${match.round}</small>`;
                     }
 
                     const matchElement = document.createElement('div');
@@ -1338,6 +1440,7 @@
             completedMatchCount.textContent = matches.filter(m => m.homeScore !== null).length;
             displayActiveLeagues();
             displayUpcomingMatches();
+            displayDashboardStats();
         }
 
         function displayActiveLeagues() {
@@ -1372,7 +1475,10 @@
             upcomingMatches.forEach(match => {
                 const homeTeam = teams.find(team => team.id === match.homeTeamId);
                 const awayTeam = teams.find(team => team.id === match.awayTeamId);
+                const league = leagues.find(l => l.id === match.leagueId);
                 if (!homeTeam || !awayTeam) return;
+
+                const leagueInfoHtml = league ? `<div class="match-league-info">${league.name}</div>` : '';
                 const matchElement = document.createElement('div');
                 matchElement.className = 'match-card card mb-3';
                 matchElement.innerHTML = `
@@ -1381,7 +1487,11 @@
                             ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             <span class="home-team text-truncate">${homeTeam.name}</span>
                         </div>
-                        <div class="text-center col-2"><div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small></div>
+                        <div class="text-center col-2">
+                            <div class="match-separator">VS</div>
+                            ${leagueInfoHtml}
+                            <small class="text-muted">P ${match.round}</small>
+                        </div>
                         <div class="d-flex align-items-center justify-content-end col-5">
                             <span class="away-team text-truncate">${awayTeam.name}</span>
                             ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
@@ -1448,12 +1558,11 @@
                 scheduleList.innerHTML = '<div class="alert alert-info">Pilih liga untuk melihat jadwal.</div>';
                 return;
             }
-             const leagueMatches = matches.filter(match => match.leagueId === selectedLeagueId);
+            const leagueMatches = matches.filter(match => match.leagueId === selectedLeagueId);
             if (leagueMatches.length === 0) {
                 scheduleList.innerHTML = '<div class="alert alert-info">Belum ada jadwal untuk liga ini. Klik "Buat Jadwal".</div>';
                 return;
             }
-            // Logic to display schedule (same as public view)
             const rounds = {};
             leagueMatches.forEach(match => { if (!rounds[match.round]) rounds[match.round] = []; rounds[match.round].push(match); });
             Object.keys(rounds).sort((a, b) => parseInt(a) - parseInt(b)).forEach(round => {
@@ -1461,27 +1570,39 @@
                 roundElement.className = 'mb-4';
                 roundElement.innerHTML = `<div class="round-title">Putaran ${round}</div>`;
                 rounds[round].forEach(match => {
-                     const homeTeam = teams.find(team => team.id === match.homeTeamId);
+                    const homeTeam = teams.find(team => team.id === match.homeTeamId);
                     const awayTeam = teams.find(team => team.id === match.awayTeamId);
+                    const league = leagues.find(l => l.id === match.leagueId);
                     if (!homeTeam || !awayTeam) return;
 
                     let homeTeamClass = 'home-team';
                     let awayTeamClass = 'away-team';
-                    let resultHtml = `<div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small>`;
+                    let homeScoreClass = '';
+                    let awayScoreClass = '';
+                    const leagueInfoHtml = league ? `<div class="match-league-info">${league.name}</div>` : '';
+                    let resultHtml = `<div class="match-separator">VS</div>${leagueInfoHtml}<small class="text-muted">P ${match.round}</small>`;
 
                     if (match.homeScore !== null && match.awayScore !== null) {
-                        resultHtml = `<div class="match-separator">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
                         if (match.homeScore > match.awayScore) {
                             homeTeamClass = 'team-winner';
                             awayTeamClass = 'team-loser';
+                            homeScoreClass = 'score-winner';
+                            awayScoreClass = 'score-loser';
                         } else if (match.homeScore < match.awayScore) {
                             homeTeamClass = 'team-loser';
                             awayTeamClass = 'team-winner';
+                            homeScoreClass = 'score-loser';
+                            awayScoreClass = 'score-winner';
                         } else {
                             homeTeamClass = 'team-draw';
                             awayTeamClass = 'team-draw';
+                            homeScoreClass = 'score-draw';
+                            awayScoreClass = 'score-draw';
                         }
+                        resultHtml = `<div class="match-separator"><span class="${homeScoreClass}">${match.homeScore}</span> - <span class="${awayScoreClass}">${match.awayScore}</span></div>${leagueInfoHtml}<small class="text-muted">P ${match.round}</small>`;
                     }
+                    
+                    const editButtonHtml = `<button class="btn btn-sm btn-outline-warning p-1 ms-2 edit-match" data-id="${match.id}" style="line-height: 1;"><i class="fas fa-edit"></i></button>`;
 
                     const matchElement = document.createElement('div');
                     matchElement.className = 'match-card card mb-3';
@@ -1495,6 +1616,7 @@
                             <div class="d-flex align-items-center justify-content-end col-5">
                                 <span class="${awayTeamClass} text-truncate">${awayTeam.name}</span>
                                 ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
+                                ${editButtonHtml}
                             </div>
                         </div>`;
                     roundElement.appendChild(matchElement);
@@ -1558,6 +1680,119 @@
             populatePublicLeagueSelect(selectElement); // Fungsi sama
         }
         
+        function calculateDashboardStats() {
+            const completedMatches = matches.filter(m => m.homeScore !== null);
+            if (teams.length === 0 || completedMatches.length === 0) {
+                return { topScorer: null, mostConceded: null, mostConsistent: null };
+            }
+
+            const teamStats = teams.map(team => {
+                let goalsFor = 0;
+                let goalsAgainst = 0;
+                matches.forEach(match => {
+                    if (match.homeScore === null) return;
+                    if (match.homeTeamId === team.id) {
+                        goalsFor += match.homeScore;
+                        goalsAgainst += match.awayScore;
+                    } else if (match.awayTeamId === team.id) {
+                        goalsFor += match.awayScore;
+                        goalsAgainst += match.homeScore;
+                    }
+                });
+                return { ...team, goalsFor, goalsAgainst };
+            });
+
+            teamStats.forEach(team => {
+                const teamMatches = matches
+                    .filter(m => (m.homeTeamId === team.id || m.awayTeamId === team.id) && m.homeScore !== null)
+                    .sort((a, b) => a.round - b.round);
+                let currentStreak = 0;
+                let maxStreak = 0;
+                teamMatches.forEach(match => {
+                    let isLoss = false;
+                    if (match.homeTeamId === team.id && match.homeScore < match.awayScore) isLoss = true;
+                    if (match.awayTeamId === team.id && match.awayScore < match.homeScore) isLoss = true;
+                    if (isLoss) {
+                        currentStreak = 0;
+                    } else {
+                        currentStreak++;
+                    }
+                    if (currentStreak > maxStreak) {
+                        maxStreak = currentStreak;
+                    }
+                });
+                team.unbeatenStreak = maxStreak;
+            });
+
+            const topScorer = [...teamStats].sort((a, b) => b.goalsFor - a.goalsFor)[0];
+            const mostConceded = [...teamStats].sort((a, b) => b.goalsAgainst - a.goalsAgainst)[0];
+            const mostConsistent = [...teamStats].sort((a, b) => b.unbeatenStreak - a.unbeatenStreak)[0];
+            
+            return { topScorer, mostConceded, mostConsistent };
+        }
+
+        function displayDashboardStats() {
+            const stats = calculateDashboardStats();
+            const publicContainer = document.getElementById('public-stats-details');
+            const adminContainer = document.getElementById('admin-stats-details');
+            
+            publicContainer.innerHTML = '';
+            adminContainer.innerHTML = '';
+
+            if (!stats.topScorer) {
+                const placeholder = `<div class="col-12"><div class="alert alert-light text-center">Statistik akan muncul setelah ada pertandingan yang dimainkan.</div></div>`;
+                publicContainer.innerHTML = placeholder;
+                adminContainer.innerHTML = placeholder;
+                return;
+            }
+
+            const topScorerHtml = `
+            <div class="col-md-4">
+                <div class="card stat-detail-card">
+                    <div class="card-body d-flex align-items-center">
+                        <i class="fas fa-futbol fa-3x text-success me-3"></i>
+                        <div>
+                            <h6>Top Skor Tim</h6>
+                            <div class="team-info">${stats.topScorer.name}</div>
+                            <div class="stat-value text-success">${stats.topScorer.goalsFor} Gol</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            const mostConcededHtml = `
+            <div class="col-md-4">
+                <div class="card stat-detail-card">
+                     <div class="card-body d-flex align-items-center">
+                        <i class="fas fa-shield-alt fa-3x text-danger me-3"></i>
+                        <div>
+                            <h6>Paling Banyak Kebobolan</h6>
+                            <div class="team-info">${stats.mostConceded.name}</div>
+                            <div class="stat-value text-danger">${stats.mostConceded.goalsAgainst} Gol</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            const mostConsistentHtml = `
+             <div class="col-md-4">
+                <div class="card stat-detail-card">
+                     <div class="card-body d-flex align-items-center">
+                        <i class="fas fa-chart-line fa-3x text-primary me-3"></i>
+                        <div>
+                            <h6>Paling Konsisten</h6>
+                            <div class="team-info">${stats.mostConsistent.name}</div>
+                            <div class="stat-value text-primary">${stats.mostConsistent.unbeatenStreak} Laga Tak Terkalahkan</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            
+            const finalHtml = topScorerHtml + mostConcededHtml + mostConsistentHtml;
+            publicContainer.innerHTML = finalHtml;
+            adminContainer.innerHTML = finalHtml;
+        }
+
         // =================================================================
         // FUNGSI OPERASI DATA (CRUD)
         // =================================================================
@@ -1664,6 +1899,31 @@
             await setDoc(doc(db, 'matches', matchId), { homeScore, awayScore }, { merge: true });
             alert('Skor berhasil disimpan!');
         }
+
+        updateScheduleBtn.addEventListener('click', async () => {
+            const matchId = document.getElementById('editMatchId').value;
+            const homeTeamId = document.getElementById('editHomeTeam').value;
+            const awayTeamId = document.getElementById('editAwayTeam').value;
+            const round = parseInt(document.getElementById('editMatchRound').value, 10);
+
+            if (homeTeamId === awayTeamId) {
+                alert('Tim kandang dan tandang tidak boleh sama!');
+                return;
+            }
+            if (!matchId || !homeTeamId || !awayTeamId || isNaN(round)) {
+                alert('Semua kolom wajib diisi!');
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, 'matches', matchId), { homeTeamId, awayTeamId, round }, { merge: true });
+                alert('Jadwal berhasil diperbarui!');
+                bootstrap.Modal.getInstance(document.getElementById('editScheduleModal')).hide();
+            } catch (error) {
+                console.error("Error updating schedule: ", error);
+                alert('Gagal memperbarui jadwal.');
+            }
+        });
         
         generateScheduleBtn.addEventListener('click', async () => {
             const leagueId = scheduleLeagueSelect.value;
@@ -1753,6 +2013,42 @@
             }
             return schedule;
         }
+        
+        function openEditScheduleModal(matchId) {
+            const match = matches.find(m => m.id === matchId);
+            if (!match) {
+                console.error("Match not found!");
+                return;
+            }
+
+            const leagueId = match.leagueId;
+            const leagueTeams = teams.filter(t => t.leagueId === leagueId);
+
+            const homeTeamSelect = document.getElementById('editHomeTeam');
+            const awayTeamSelect = document.getElementById('editAwayTeam');
+
+            homeTeamSelect.innerHTML = '';
+            awayTeamSelect.innerHTML = '';
+
+            leagueTeams.forEach(team => {
+                const optionHome = document.createElement('option');
+                optionHome.value = team.id;
+                optionHome.textContent = team.name;
+                homeTeamSelect.appendChild(optionHome);
+
+                const optionAway = document.createElement('option');
+                optionAway.value = team.id;
+                optionAway.textContent = team.name;
+                awayTeamSelect.appendChild(optionAway);
+            });
+            
+            document.getElementById('editMatchId').value = match.id;
+            homeTeamSelect.value = match.homeTeamId;
+            awayTeamSelect.value = match.awayTeamId;
+            document.getElementById('editMatchRound').value = match.round;
+
+            new bootstrap.Modal(document.getElementById('editScheduleModal')).show();
+        }
 
         // Event delegation untuk tombol dinamis
         document.getElementById('adminPanel').addEventListener('click', (e) => {
@@ -1782,6 +2078,8 @@
                 }
             } else if (target.classList.contains('delete-team')) {
                 deleteTeam(id);
+            } else if (target.classList.contains('edit-match')) {
+                openEditScheduleModal(id);
             }
         });
 
