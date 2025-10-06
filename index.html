@@ -38,8 +38,39 @@
 </head>
 <body>
 
+    <!-- Firebase Imports (MUST be type="module") -->
     <script type="module">
-        // --- Variabel Global ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Set log level to Debug for visibility
+        setLogLevel('Debug');
+
+        // --- Konfigurasi Firebase Anda ---
+        const USER_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCfikX-HQuKhtSksHzyJwuBF-dUr0ckGRE",
+            authDomain: "wayliga.firebaseapp.com",
+            projectId: "wayliga",
+            storageBucket: "wayliga.firebasestorage.app",
+            messagingSenderId: "178418335963",
+            appId: "1:178418335963:web:a9ff5dadc64fa9cdcf8cfe",
+            measurementId: "G-5QDKCZDL8X"
+        };
+        const FIREBASE_APP_ID = USER_FIREBASE_CONFIG.projectId || 'default-project'; // Menggunakan Project ID sebagai ID aplikasi
+
+        let app, db, auth;
+        let userId = 'anon_user';
+
+        // Path dokumen publik untuk data liga
+        const getLeagueDocRef = (dbInstance) => {
+            // Path: /artifacts/{projectId}/public/data/leagues/activeLeague
+            return doc(dbInstance, 'artifacts', FIREBASE_APP_ID, 'public', 'data', 'leagues', 'activeLeague');
+        };
+        // ----------------------------------
+
+
+        // --- Variabel Global Aplikasi ---
         const ADMIN_PASSWORD = 'adminganteng';
         let leagueData = null;
         let isAdminLoggedIn = false; 
@@ -114,157 +145,91 @@
 
 
         // =================================================================
-        // 2. PERSISTENCE (LOKAL STORAGE)
+        // 2. FIREBASE / CLOUD PERSISTENCE
         // =================================================================
 
-        const saveDataLocally = async (dataToSave) => {
-            try {
-                localStorage.setItem('leagueData', JSON.stringify(dataToSave));
-                renderApp(dataToSave); 
-            } catch (error) {
-                window.alert("Gagal menyimpan data lokal. Browser mungkin penuh.");
+        const updateConnectionStatus = (isSuccess, message) => {
+            const statusEl = document.getElementById('connection-status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = `p-1 rounded-lg text-xs font-medium transition-colors duration-300 ${isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
             }
         };
 
-        const loadDataLocally = () => {
-            try {
-                const savedData = localStorage.getItem('leagueData');
-                if (savedData) return JSON.parse(savedData);
-            } catch (error) {
-                console.error("[STORAGE ERROR] Corrupt local data.", error);
+        const saveDataToCloud = async (dataToSave) => {
+            if (!db || !auth.currentUser) {
+                console.error("Firestore tidak terinisialisasi atau user tidak terotentikasi.");
+                updateConnectionStatus(false, "ERROR: Cloud save failed (Auth/Init).");
+                return;
             }
-            return createInitialData();
+            try {
+                await setDoc(getLeagueDocRef(db), dataToSave, { merge: false });
+                console.log("Data liga berhasil disimpan ke Cloud Firestore.");
+                updateConnectionStatus(true, "Cloud Database terhubung dan sinkron.");
+            } catch (error) {
+                console.error("Gagal menyimpan data ke Firestore:", error);
+                updateConnectionStatus(false, "ERROR: Gagal menyimpan data Cloud. (Rules?)");
+            }
         };
 
-        // =================================================================
-        // NEW: DOUBLE ROUND ROBIN GENERATOR (Home & Away)
-        // =================================================================
-
-        /**
-         * Helper function to generate one phase of the schedule.
-         */
-        const generateSchedulePhase = (teamNames, startBabak, startMatchId, isReversed) => {
-            let teams = [...teamNames];
-            const originalLength = teams.length;
-            const isOdd = originalLength % 2 !== 0;
-
-            if (isOdd) teams.push('BYE');
-
-            const numTeams = teams.length;
-            const numRounds = numTeams - 1;
-            const matches = [];
-            let matchCounter = startMatchId;
+        const listenToCloudData = () => {
+             if (!auth.currentUser || !auth.currentUser.uid) {
+                updateConnectionStatus(false, "ERROR: Menunggu otentikasi...");
+                return;
+            }
             
-            let teamPivot = teams[0];
-            let rotationTeams = teams.slice(1);
-
-            for (let round = 0; round < numRounds; round++) { // round counter starts at 0 internally
-                const currentBabak = startBabak + round;
-                const roundMatches = [];
-                const mid = rotationTeams.length / 2;
-
-                // 1. Matches between rotating teams
-                for (let i = 0; i < mid; i++) {
-                    const teamA = rotationTeams[i];
-                    const teamB = rotationTeams[numTeams - 2 - i];
-
-                    if (teamA === 'BYE' || teamB === 'BYE') continue;
-
-                    let home, away;
-                    // Determine home/away based on index and round for parity
-                    const isHomeBasedOnIndex = (round + i) % 2 === 1; 
-
-                    if (isReversed) {
-                        // Phase 2: Reverse assignment
-                        home = isHomeBasedOnIndex ? teamB : teamA;
-                        away = isHomeBasedOnIndex ? teamA : teamB;
-                    } else {
-                        // Phase 1: Normal assignment
-                        home = isHomeBasedOnIndex ? teamA : teamB;
-                        away = isHomeBasedOnIndex ? teamB : teamA;
-                    }
-                    
-                    roundMatches.push({
-                        home: home,
-                        away: away,
-                        homeScore: null,
-                        awayScore: null,
-                        status: 'Scheduled',
-                        babak: currentBabak,
-                        match: matchCounter++
-                    });
-                }
-
-                // 2. Match involving pivot/BYE
-                const pivotOpponent = rotationTeams[rotationTeams.length - 1];
-                
-                if (teamPivot === 'BYE') {
-                    // Pivot is BYE, opponent plays BYE
-                    roundMatches.push({ status: 'Bye', babak: currentBabak, byeTeam: pivotOpponent });
-                } else if (pivotOpponent === 'BYE') {
-                    // Opponent is BYE, pivot plays BYE
-                    roundMatches.push({ status: 'Bye', babak: currentBabak, byeTeam: teamPivot });
+            const docRef = getLeagueDocRef(db);
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    leagueData = docSnap.data();
+                    renderApp(leagueData);
+                    updateConnectionStatus(true, "Cloud Database terhubung dan sinkron.");
                 } else {
-                    // Match between pivot and opponent
-                    let home, away;
-                    const isPivotHome = currentBabak % 2 === 1; // Pivot plays home on odd rounds (Pekan)
-
-                    if (isReversed) {
-                        // Phase 2: Reverse assignment
-                        home = isPivotHome ? pivotOpponent : teamPivot;
-                        away = isPivotHome ? teamA : pivotOpponent; // FIX: should be pivotOpponent/teamPivot
-                        home = isPivotHome ? pivotOpponent : teamPivot;
-                        away = isPivotHome ? teamPivot : pivotOpponent;
-                    } else {
-                        // Phase 1: Normal assignment
-                        home = isPivotHome ? teamPivot : pivotOpponent;
-                        away = isPivotHome ? pivotOpponent : teamPivot;
-                    }
-
-                    roundMatches.push({
-                        home: home,
-                        away: away,
-                        homeScore: null,
-                        awayScore: null,
-                        status: 'Scheduled',
-                        babak: currentBabak,
-                        match: matchCounter++
-                    });
+                    // Dokumen belum ada. 
+                    updateConnectionStatus(false, "Dokumen Database belum ada. Admin perlu Reset Data.");
+                    leagueData = createInitialData();
+                    renderApp(leagueData); // Tampilkan data default
                 }
+            }, (error) => {
+                console.error("Kesalahan listener Firestore:", error);
+                updateConnectionStatus(false, "ERROR: Gagal Mendengarkan Cloud. (Network?)");
+            });
+        };
+
+
+        const initFirebaseAndAuth = async () => {
+            try {
+                app = initializeApp(USER_FIREBASE_CONFIG);
+                db = getFirestore(app);
+                auth = getAuth(app);
                 
-                matches.push(...roundMatches);
-                // Rotation: Rotate all except the pivot
-                rotationTeams.unshift(rotationTeams.pop());
+                updateConnectionStatus(false, "Mengotentikasi...");
+
+                // Otentikasi Anonim (Sesuai Aturan Firestore Anda)
+                await signInAnonymously(auth);
+
+                // Listener untuk memastikan Auth berhasil sebelum mendengarkan data
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        listenToCloudData();
+                    } else {
+                        updateConnectionStatus(false, "ERROR: Gagal otentikasi anonim.");
+                    }
+                });
+                
+            } catch (error) {
+                console.error("Kesalahan saat inisialisasi Firebase:", error);
+                updateConnectionStatus(false, "ERROR: Inisialisasi Firebase gagal.");
+                // Fallback to initial local data load if Firebase fails completely
+                leagueData = createInitialData();
+                renderApp(leagueData);
             }
-
-            return { matches, nextBabak: startBabak + numRounds, nextMatchId: matchCounter };
         };
-
-
-        /**
-         * Main function to generate the Double Round Robin (Home/Away).
-         */
-        const generateRoundRobinSchedule = (teamNames) => {
-            // PHASE 1: Normal (Home) Matches
-            const phase1Result = generateSchedulePhase(teamNames, 1, 1, false);
-            let allMatches = [...phase1Result.matches];
-            
-            // PHASE 2: Reversed (Away) Matches, starting immediately after phase 1
-            const phase2Result = generateSchedulePhase(
-                teamNames, 
-                phase1Result.nextBabak, 
-                phase1Result.nextMatchId, 
-                true // TRUE to reverse home/away for the second phase
-            );
-            
-            allMatches = allMatches.concat(phase2Result.matches);
-            
-            return allMatches;
-        };
-
 
         // =================================================================
-        // 3. GLOBAL FUNCTIONS (CRUD & AUTH)
+        // 3. GLOBAL FUNCTIONS (CRUD & GENERATOR)
         // =================================================================
 
         // Fungsi Global untuk Score Submission
@@ -290,7 +255,7 @@
             updatedSchedule[matchIndex].status = (homeScore !== null && awayScore !== null) ? 'Finished' : 'Scheduled';
 
             const dataToSave = { ...leagueData, schedule: updatedSchedule, lastUpdated: new Date().toISOString() };
-            await saveDataLocally(dataToSave);
+            await saveDataToCloud(dataToSave);
         };
         
         // --- ADMIN AUTH & UI ---
@@ -324,8 +289,8 @@
             const newTitle = document.getElementById('league-title-input').value.trim();
             if (!newTitle) return window.alert('Nama liga tidak boleh kosong.');
             const dataToSave = { ...leagueData, title: newTitle, lastUpdated: new Date().toISOString() };
-            await saveDataLocally(dataToSave);
-            window.alert('Nama liga berhasil diperbarui secara lokal.');
+            await saveDataToCloud(dataToSave);
+            window.alert('Nama liga berhasil diperbarui.');
         }
 
         window.addNewTeam = async () => {
@@ -338,7 +303,7 @@
             const updatedTeams = [...leagueData.teams, { name: newName, points: 0, played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, diff: 0 }];
             const dataToSave = { ...leagueData, teams: updatedTeams, lastUpdated: new Date().toISOString() };
             
-            await saveDataLocally(dataToSave);
+            await saveDataToCloud(dataToSave);
             document.getElementById('new-team-input').value = '';
             window.alert(`Tim "${newName}" berhasil ditambahkan.`);
         }
@@ -363,7 +328,7 @@
             });
 
             const dataToSave = { ...leagueData, schedule: updatedSchedule, teams: updatedTeams, lastUpdated: new Date().toISOString() };
-            await saveDataLocally(dataToSave);
+            await saveDataToCloud(dataToSave);
             window.alert(`Nama tim "${oldName}" berhasil diubah menjadi "${newName}".`);
         }
         
@@ -375,22 +340,127 @@
 
             const dataToSave = { ...leagueData, schedule: updatedSchedule, teams: updatedTeams, lastUpdated: new Date().toISOString() };
             
-            await saveDataLocally(dataToSave);
+            await saveDataToCloud(dataToSave);
             window.alert(`Tim "${teamName}" berhasil dihapus.`);
         }
+
+        const generateSchedulePhase = (teamNames, startBabak, startMatchId, isReversed) => {
+            let teams = [...teamNames];
+            const originalLength = teams.length;
+            const isOdd = originalLength % 2 !== 0;
+
+            if (isOdd) teams.push('BYE');
+
+            const numTeams = teams.length;
+            const numRounds = numTeams - 1;
+            const matches = [];
+            let matchCounter = startMatchId;
+            
+            let teamPivot = teams[0];
+            let rotationTeams = teams.slice(1);
+
+            for (let round = 0; round < numRounds; round++) { 
+                const currentBabak = startBabak + round;
+                const roundMatches = [];
+                const mid = rotationTeams.length / 2;
+
+                for (let i = 0; i < mid; i++) {
+                    const teamA = rotationTeams[i];
+                    const teamB = rotationTeams[numTeams - 2 - i];
+
+                    if (teamA === 'BYE' || teamB === 'BYE') continue;
+
+                    let home, away;
+                    const isHomeBasedOnIndex = (round + i) % 2 === 1; 
+
+                    const shouldTeamABeHome = isReversed ? !isHomeBasedOnIndex : isHomeBasedOnIndex;
+
+                    if (shouldTeamABeHome) {
+                        home = teamA;
+                        away = teamB;
+                    } else {
+                        home = teamB;
+                        away = teamA;
+                    }
+                    
+                    roundMatches.push({
+                        home: home,
+                        away: away,
+                        homeScore: null,
+                        awayScore: null,
+                        status: 'Scheduled',
+                        babak: currentBabak,
+                        match: matchCounter++
+                    });
+                }
+
+                const pivotOpponent = rotationTeams[rotationTeams.length - 1];
+                
+                if (teamPivot === 'BYE') {
+                    roundMatches.push({ status: 'Bye', babak: currentBabak, byeTeam: pivotOpponent });
+                } else if (pivotOpponent === 'BYE') {
+                    roundMatches.push({ status: 'Bye', babak: currentBabak, byeTeam: teamPivot });
+                } else {
+                    let home, away;
+                    const isPivotHomeDefault = currentBabak % 2 === 1; 
+
+                    const shouldPivotBeHome = isReversed ? !isPivotHomeDefault : isPivotHomeDefault;
+
+                    if (shouldPivotBeHome) {
+                        home = teamPivot;
+                        away = pivotOpponent;
+                    } else {
+                        home = pivotOpponent;
+                        away = teamPivot;
+                    }
+
+                    roundMatches.push({
+                        home: home,
+                        away: away,
+                        homeScore: null,
+                        awayScore: null,
+                        status: 'Scheduled',
+                        babak: currentBabak,
+                        match: matchCounter++
+                    });
+                }
+                
+                matches.push(...roundMatches);
+                rotationTeams.unshift(rotationTeams.pop());
+            }
+
+            return { matches, nextBabak: startBabak + numRounds, nextMatchId: matchCounter };
+        };
+
+
+        const generateRoundRobinSchedule = (teamNames) => {
+            const phase1Result = generateSchedulePhase(teamNames, 1, 1, false);
+            let allMatches = [...phase1Result.matches];
+            
+            const phase2Result = generateSchedulePhase(
+                teamNames, 
+                phase1Result.nextBabak, 
+                phase1Result.nextMatchId, 
+                true 
+            );
+            
+            allMatches = allMatches.concat(phase2Result.matches);
+            
+            return allMatches;
+        };
+
 
         window.generateNewSchedule = async () => {
             if (leagueData.teams.length < 2) return window.alert("Minimal harus ada 2 tim.");
             if (!window.confirm("Yakin ingin membuat JADWAL BARU (Double Round Robin)? Semua skor dan jadwal yang ada akan hilang!")) return;
             
             const teamNames = leagueData.teams.map(t => t.name);
-            // Call the new Double Round Robin generator
             const newSchedule = generateRoundRobinSchedule(teamNames);
 
             const dataToSave = { ...leagueData, schedule: newSchedule, lastUpdated: new Date().toISOString() };
 
-            await saveDataLocally(dataToSave);
-            window.alert('Jadwal baru (Double Round Robin) berhasil dibuat dan disimpan secara lokal.');
+            await saveDataToCloud(dataToSave);
+            window.alert('Jadwal baru (Double Round Robin) berhasil dibuat.');
             hideAdminPanel();
         }
 
@@ -398,8 +468,8 @@
             if (!window.confirm("Apakah Anda yakin ingin RESET semua data liga? Ini akan menggunakan jadwal 9 tim awal Anda.")) return;
             try {
                 const initialData = createInitialData();
-                await saveDataLocally(initialData); 
-                window.alert("Reset Berhasil! Data lokal telah diperbarui.");
+                await saveDataToCloud(initialData); // Force write to cloud
+                window.alert("Reset Berhasil! Data cloud telah diperbarui.");
                 hideAdminPanel();
             } catch (error) {
                 window.alert("Gagal melakukan Reset Data.");
@@ -407,12 +477,11 @@
         };
 
         window.deleteActiveLeagueData = async () => {
-            if (!window.confirm("PERINGATAN! Yakin ingin HAPUS PERMANEN SEMUA DATA LIGA INI? Ini hanya akan menghapus data di perangkat ini.")) return;
+            if (!window.confirm("PERINGATAN! Yakin ingin HAPUS PERMANEN SEMUA DATA LIGA INI?")) return;
             try {
-                localStorage.removeItem('leagueData'); 
-                leagueData = createInitialData(); // Load default data
-                renderApp(leagueData);
-                window.alert("Data liga berhasil dihapus dari perangkat ini.");
+                const emptyData = { teams: [], schedule: [], title: 'Liga Kosong', lastUpdated: new Date().toISOString() };
+                await saveDataToCloud(emptyData);
+                window.alert("Data liga berhasil dihapus dari Cloud.");
                 hideAdminPanel();
             } catch (error) {
                 window.alert("Gagal menghapus data liga.");
@@ -677,7 +746,10 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-100">
                                         ${groupedSchedule[babak].map((match) => {
-                                            const globalIndex = leagueData.schedule.findIndex(m => m.home === match.home && m.away === match.away && m.babak === match.babak && m.match === match.match || m.byeTeam === match.byeTeam && m.babak === match.babak);
+                                            const globalIndex = leagueData.schedule.findIndex(m => 
+                                                (m.home === match.home && m.away === match.away && m.babak === match.babak && m.match === match.match) || 
+                                                (m.byeTeam === match.byeTeam && m.babak === match.babak)
+                                            );
                                             return renderMatchRow(match, globalIndex);
                                         }).join('')}
                                     </tbody>
@@ -722,8 +794,8 @@
 
             return `
                 <div id="admin-panel" class="card admin-section mt-10 p-6">
-                    <h2 class="text-xl font-bold text-red-700 mb-4 border-b pb-2 border-red-300">Panel Admin (Mode Lokal)</h2>
-                    <p class="mb-4 text-xs text-red-600">Liga Aktif: <span class="font-bold">${leagueTitle}</span> | Data disimpan di browser Anda.</p>
+                    <h2 class="text-xl font-bold text-red-700 mb-4 border-b pb-2 border-red-300">Panel Admin (Mode Cloud)</h2>
+                    <p class="mb-4 text-xs text-red-600">Liga Aktif: <span class="font-bold">${leagueTitle}</span> | Data disimpan di Cloud Firebase.</p>
                     
                     <div class="space-y-6">
                         
@@ -750,7 +822,7 @@
                              <!-- Hapus Liga -->
                             <hr class="my-3 border-gray-100">
                             <button id="btn-delete-league" class="w-full bg-gray-500 text-white p-2 rounded-lg font-semibold hover:bg-gray-600 text-sm">
-                                Hapus Semua Data Liga Aktif (Lokal)
+                                Hapus Semua Data Liga Aktif (Cloud)
                             </button>
                         </div>
 
@@ -823,6 +895,8 @@
 
             // Perbarui judul utama
             document.getElementById('main-title').textContent = leagueData.title;
+            document.getElementById('league-title-display').textContent = leagueData.title;
+
 
             updateTabUI(currentView);
             document.title = leagueData.title;
@@ -882,10 +956,8 @@
 
         // 6. INITIATOR
         window.onload = () => {
-            // Load data and render
-            leagueData = loadDataLocally();
-            renderApp(leagueData); 
-            window.setActiveTab('schedule'); 
+            // Start Firebase initialization
+            initFirebaseAndAuth();
         };
 
         // Update tab UI appearance
@@ -923,6 +995,9 @@
                     <!-- Judul Diisi oleh JS -->
                 </h1>
                 <div class="flex items-center space-x-2">
+                    <div id="connection-status" class="p-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
+                        Memuat Cloud...
+                    </div>
                     <!-- Tombol Admin BARU (Memanggil Modal) -->
                     <button onclick="showAdminModal()" class="bg-yellow-500 text-white font-semibold py-1 px-3 rounded-lg shadow-md hover:bg-yellow-600 transition-colors text-xs">
                         Admin
@@ -959,7 +1034,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Memuat data lokal...
+                    Memuat data...
                 </div>
             </div>
         </main>
