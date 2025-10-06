@@ -1001,36 +1001,29 @@
             try {
                 // Langsung coba login dengan email yang sudah ditentukan dan sandi dari form
                 await signInWithEmailAndPassword(auth, adminEmail, password);
-                // onAuthStateChanged akan menangani tampilan panel admin jika berhasil
             } catch (error) {
-                // Tangani berbagai jenis error
-                if (error.code === 'auth/user-not-found') {
+                // Tangani berbagai jenis error, termasuk 'invalid-login-credentials' yang baru
+                if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
                     // Jika pengguna admin belum ada, buat akun baru HANYA jika sandi yang dimasukkan benar
                     if (password === adminPassword) {
                         try {
-                            await createUserWithEmailAndPassword(auth, adminEmail, password);
-                            // Setelah akun dibuat, onAuthStateChanged akan otomatis login
+                            await createUserWithEmailAndPassword(auth, adminEmail, adminPassword);
                         } catch (createError) {
-                            if (createError.code === 'auth/operation-not-allowed') {
-                                alert('Gagal membuat akun admin. Pastikan metode "Email/Password" diaktifkan di Firebase Authentication console Anda.');
+                            // Tangani kasus di mana pengguna sudah ada (artinya sandi login awal salah)
+                            if (createError.code === 'auth/email-already-in-use') {
+                                alert('Sandi yang Anda masukkan salah!');
                             } else {
                                 alert('Gagal membuat akun admin. Cek konsol untuk detail.');
+                                console.error("Firebase create user error:", createError);
                             }
-                            console.error("Firebase create user error:", createError);
                         }
                     } else {
-                        // Pengguna mencoba membuat akun admin dengan sandi yang salah
                         alert('Sandi yang Anda masukkan salah!');
                     }
-                } else if (error.code === 'auth/wrong-password') {
-                    // Error standar untuk sandi yang salah
-                    alert('Sandi yang Anda masukkan salah!');
                 } else if (error.code === 'auth/operation-not-allowed') {
-                    // Error konfigurasi
                     alert('Login gagal. Pastikan metode "Email/Password" diaktifkan di Firebase Authentication console Anda.');
                     console.error("Firebase login error:", error);
                 } else {
-                    // Error tak terduga lainnya
                     alert('Terjadi kesalahan saat login. Cek konsol untuk detail.');
                     console.error("Firebase login error:", error);
                 }
@@ -1048,7 +1041,6 @@
         logoutBtn.addEventListener('click', async () => {
             if (confirm('Apakah Anda yakin ingin logout?')) {
                 await signOut(auth);
-                // onAuthStateChanged akan menangani tampilan publik
             }
         });
         
@@ -1158,8 +1150,7 @@
                 return;
             }
             const standings = calculateStandings(selectedLeagueId);
-            // ... (Kode tampilan klasemen sama seperti sebelumnya) ...
-             let html = `
+            let html = `
                 <div class="table-responsive">
                     <table class="standings-table">
                         <thead>
@@ -1191,7 +1182,6 @@
                 publicScheduleList.innerHTML = '<div class="alert alert-info">Pilih liga untuk melihat jadwal.</div>';
                 return;
             }
-            // ... (Kode tampilan jadwal sama seperti sebelumnya) ...
              const leagueMatches = matches.filter(match => match.leagueId === selectedLeagueId);
             if (leagueMatches.length === 0) {
                 publicScheduleList.innerHTML = '<div class="alert alert-info">Belum ada jadwal untuk liga ini.</div>';
@@ -1249,7 +1239,6 @@
                 activeLeaguesList.innerHTML = '<div class="alert alert-info">Belum ada liga.</div>';
                 return;
             }
-            // ... (Kode tampilan sama seperti versi publik)
              leagues.forEach(league => {
                 const leagueTeams = teams.filter(team => team.leagueId === league.id);
                 const leagueElement = document.createElement('div');
@@ -1268,7 +1257,6 @@
         
         function displayUpcomingMatches() {
             upcomingMatchesList.innerHTML = '';
-            // ... (Kode tampilan sama seperti versi publik)
              const upcomingMatches = matches.filter(match => match.homeScore === null).slice(0, 5);
             if (upcomingMatches.length === 0) {
                 upcomingMatchesList.innerHTML = '<div class="alert alert-info">Tidak ada pertandingan berikutnya.</div>';
@@ -1358,7 +1346,6 @@
                 inputScoresList.innerHTML = '<div class="alert alert-info">Pilih liga untuk input skor.</div>';
                 return;
             }
-            // ... (Kode tampilan input skor sama seperti sebelumnya) ...
              const leagueMatches = matches.filter(match => match.leagueId === selectedLeagueId);
             if (leagueMatches.length === 0) {
                 inputScoresList.innerHTML = '<div class="alert alert-info">Tidak ada pertandingan untuk liga ini.</div>';
