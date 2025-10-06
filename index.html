@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2c3e50;
@@ -16,10 +16,13 @@
             --accent: #e74c3c;
             --light: #ecf0f1;
             --dark: #2c3e50;
+            --win: #27ae60;
+            --draw: #f39c12;
+            --loss: #c0392b;
         }
         
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
             color: #333;
         }
@@ -96,17 +99,18 @@
         }
         
         .league-logo, .team-logo {
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             object-fit: contain;
             background-color: white;
             border-radius: 5px;
-            padding: 5px;
+            padding: 4px;
         }
         
         .match-card {
             border-left: 4px solid var(--secondary);
             transition: transform 0.2s;
+            padding: 0.5rem 0.75rem;
         }
         
         .match-card:hover {
@@ -233,10 +237,14 @@
             vertical-align: middle;
         }
         
-        .standings-table tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
+        .standings-table .pos-1 { background-color: #d4edda; }
+        .standings-table .pos-2 { background-color: #cce5ff; }
+        .standings-table .pos-3 { background-color: #fff3cd; }
         
+        .standings-table .win { color: var(--win); font-weight: 600; }
+        .standings-table .draw { color: var(--draw); font-weight: 600; }
+        .standings-table .loss { color: var(--loss); font-weight: 600; }
+
         .standings-table tr:hover {
             background-color: #e9f7fe;
         }
@@ -269,6 +277,56 @@
             font-weight: bold;
             margin: 0 10px;
         }
+
+        .match-separator {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .team-winner {
+            color: var(--win);
+            font-weight: 700;
+        }
+        .team-loser {
+            color: #95a5a6;
+            opacity: 0.8;
+        }
+        .team-draw {
+            font-weight: 600;
+        }
+
+        .match-card .text-truncate {
+            font-size: 0.85rem;
+        }
+
+        .match-card small {
+            font-size: 0.7rem;
+        }
+
+        @media (max-width: 768px) {
+            .horizontal-menu .nav-link {
+                padding: 10px 8px; /* Padding lebih rapat */
+                margin: 0 1px;
+                font-size: 0.8rem; /* Font lebih kecil */
+            }
+            .main-content {
+                padding: 10px; /* Rapatkan padding konten utama juga */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .horizontal-menu .nav-link .nav-link-text {
+                display: none; /* Sembunyikan teks menu */
+            }
+            .horizontal-menu .nav-link i {
+                margin-right: 0 !important;
+                font-size: 1.1rem;
+            }
+            .horizontal-menu .nav-link {
+                padding: 8px 12px; /* Padding untuk ikon saja */
+            }
+        }
     </style>
 </head>
 <body>
@@ -293,13 +351,13 @@
             <div class="container-fluid">
                 <div class="navbar-nav mx-auto">
                     <a class="nav-link active" href="#" data-tab="public-dashboard">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dasbor
+                        <i class="fas fa-tachometer-alt me-2"></i><span class="nav-link-text">Dasbor</span>
                     </a>
                     <a class="nav-link" href="#" data-tab="public-standings">
-                        <i class="fas fa-table me-2"></i>Klasemen
+                        <i class="fas fa-table me-2"></i><span class="nav-link-text">Klasemen</span>
                     </a>
                     <a class="nav-link" href="#" data-tab="public-schedule">
-                        <i class="fas fa-calendar-alt me-2"></i>Jadwal Tanding
+                        <i class="fas fa-calendar-alt me-2"></i><span class="nav-link-text">Jadwal Tanding</span>
                     </a>
                 </div>
             </div>
@@ -468,22 +526,22 @@
             <div class="container-fluid">
                 <div class="navbar-nav mx-auto">
                     <a class="nav-link active" href="#" data-tab="dashboard">
-                        <i class="fas fa-tachometer-alt me-2"></i>Dasbor
+                        <i class="fas fa-tachometer-alt me-2"></i><span class="nav-link-text">Dasbor</span>
                     </a>
                     <a class="nav-link" href="#" data-tab="leagues">
-                        <i class="fas fa-trophy me-2"></i>Kelola Liga
+                        <i class="fas fa-trophy me-2"></i><span class="nav-link-text">Kelola Liga</span>
                     </a>
                     <a class="nav-link" href="#" data-tab="teams">
-                        <i class="fas fa-users me-2"></i>Kelola Tim
+                        <i class="fas fa-users me-2"></i><span class="nav-link-text">Kelola Tim</span>
                     </a>
                     <a class="nav-link" href="#" data-tab="schedule">
-                        <i class="fas fa-calendar-alt me-2"></i>Jadwal Tanding
+                        <i class="fas fa-calendar-alt me-2"></i><span class="nav-link-text">Jadwal Tanding</span>
                     </a>
                     <a class="nav-link" href="#" data-tab="input-scores">
-                        <i class="fas fa-futbol me-2"></i>Input Skor
+                        <i class="fas fa-futbol me-2"></i><span class="nav-link-text">Input Skor</span>
                     </a>
                     <a class="nav-link" href="#" data-tab="standings">
-                        <i class="fas fa-table me-2"></i>Klasemen
+                        <i class="fas fa-table me-2"></i><span class="nav-link-text">Klasemen</span>
                     </a>
                 </div>
             </div>
@@ -1133,14 +1191,14 @@
                 const awayTeam = teams.find(team => team.id === match.awayTeamId);
                 if (!homeTeam || !awayTeam) return;
                 const matchElement = document.createElement('div');
-                matchElement.className = 'match-card card p-3 mb-3';
+                matchElement.className = 'match-card card mb-3';
                 matchElement.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center col-5">
                             ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             <span class="home-team text-truncate">${homeTeam.name}</span>
                         </div>
-                        <div class="text-center col-2"><div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small></div>
+                        <div class="text-center col-2"><div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small></div>
                         <div class="d-flex align-items-center justify-content-end col-5">
                             <span class="away-team text-truncate">${awayTeam.name}</span>
                             ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
@@ -1184,14 +1242,21 @@
                         </thead>
                         <tbody>`;
             standings.forEach((team, index) => {
+                let rowClass = '';
+                if (index === 0) rowClass = 'pos-1';
+                if (index === 1) rowClass = 'pos-2';
+                if (index === 2) rowClass = 'pos-3';
                 html += `
-                    <tr>
+                    <tr class="${rowClass}">
                         <td class="position-cell">${index + 1}</td>
                         <td class="team-cell">
                             ${team.logo ? `<img src="${team.logo}" alt="${team.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             <span class="text-truncate">${team.name}</span>
                         </td>
-                        <td>${team.played}</td><td>${team.wins}</td><td>${team.draws}</td><td>${team.losses}</td>
+                        <td>${team.played}</td>
+                        <td><span class="win">${team.wins}</span></td>
+                        <td><span class="draw">${team.draws}</span></td>
+                        <td><span class="loss">${team.losses}</span></td>
                         <td class="d-none d-md-table-cell">${team.goalsFor}</td>
                         <td class="d-none d-md-table-cell">${team.goalsAgainst}</td>
                         <td class="d-none d-md-table-cell">${team.goalDifference}</td>
@@ -1227,21 +1292,36 @@
                      const homeTeam = teams.find(team => team.id === match.homeTeamId);
                     const awayTeam = teams.find(team => team.id === match.awayTeamId);
                     if (!homeTeam || !awayTeam) return;
-                    const matchElement = document.createElement('div');
-                    matchElement.className = 'match-card card p-3 mb-3';
-                    let resultHtml = `<div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small>`;
+
+                    let homeTeamClass = 'home-team';
+                    let awayTeamClass = 'away-team';
+                    let resultHtml = `<div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small>`;
+
                     if (match.homeScore !== null && match.awayScore !== null) {
-                         resultHtml = `<div class="fw-bold">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
+                        resultHtml = `<div class="match-separator">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
+                        if (match.homeScore > match.awayScore) {
+                            homeTeamClass = 'team-winner';
+                            awayTeamClass = 'team-loser';
+                        } else if (match.homeScore < match.awayScore) {
+                            homeTeamClass = 'team-loser';
+                            awayTeamClass = 'team-winner';
+                        } else {
+                            homeTeamClass = 'team-draw';
+                            awayTeamClass = 'team-draw';
+                        }
                     }
+
+                    const matchElement = document.createElement('div');
+                    matchElement.className = 'match-card card mb-3';
                     matchElement.innerHTML = `
                          <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center col-5">
                                 ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
-                                <span class="home-team text-truncate">${homeTeam.name}</span>
+                                <span class="${homeTeamClass} text-truncate">${homeTeam.name}</span>
                             </div>
                             <div class="text-center col-2">${resultHtml}</div>
                             <div class="d-flex align-items-center justify-content-end col-5">
-                                <span class="away-team text-truncate">${awayTeam.name}</span>
+                                <span class="${awayTeamClass} text-truncate">${awayTeam.name}</span>
                                 ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             </div>
                         </div>`;
@@ -1294,14 +1374,14 @@
                 const awayTeam = teams.find(team => team.id === match.awayTeamId);
                 if (!homeTeam || !awayTeam) return;
                 const matchElement = document.createElement('div');
-                matchElement.className = 'match-card card p-3 mb-3';
+                matchElement.className = 'match-card card mb-3';
                 matchElement.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center col-5">
                             ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             <span class="home-team text-truncate">${homeTeam.name}</span>
                         </div>
-                        <div class="text-center col-2"><div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small></div>
+                        <div class="text-center col-2"><div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small></div>
                         <div class="d-flex align-items-center justify-content-end col-5">
                             <span class="away-team text-truncate">${awayTeam.name}</span>
                             ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
@@ -1384,21 +1464,36 @@
                      const homeTeam = teams.find(team => team.id === match.homeTeamId);
                     const awayTeam = teams.find(team => team.id === match.awayTeamId);
                     if (!homeTeam || !awayTeam) return;
-                    const matchElement = document.createElement('div');
-                    matchElement.className = 'match-card card p-3 mb-3';
-                    let resultHtml = `<div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small>`;
+
+                    let homeTeamClass = 'home-team';
+                    let awayTeamClass = 'away-team';
+                    let resultHtml = `<div class="match-separator">VS</div><small class="text-muted">P ${match.round}</small>`;
+
                     if (match.homeScore !== null && match.awayScore !== null) {
-                         resultHtml = `<div class="fw-bold">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
+                        resultHtml = `<div class="match-separator">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
+                        if (match.homeScore > match.awayScore) {
+                            homeTeamClass = 'team-winner';
+                            awayTeamClass = 'team-loser';
+                        } else if (match.homeScore < match.awayScore) {
+                            homeTeamClass = 'team-loser';
+                            awayTeamClass = 'team-winner';
+                        } else {
+                            homeTeamClass = 'team-draw';
+                            awayTeamClass = 'team-draw';
+                        }
                     }
+
+                    const matchElement = document.createElement('div');
+                    matchElement.className = 'match-card card mb-3';
                     matchElement.innerHTML = `
                          <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center col-5">
                                 ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
-                                <span class="home-team text-truncate">${homeTeam.name}</span>
+                                <span class="${homeTeamClass} text-truncate">${homeTeam.name}</span>
                             </div>
                             <div class="text-center col-2">${resultHtml}</div>
                             <div class="d-flex align-items-center justify-content-end col-5">
-                                <span class="away-team text-truncate">${awayTeam.name}</span>
+                                <span class="${awayTeamClass} text-truncate">${awayTeam.name}</span>
                                 ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             </div>
                         </div>`;
@@ -1430,7 +1525,7 @@
                     const awayTeam = teams.find(team => team.id === match.awayTeamId);
                     if (!homeTeam || !awayTeam) return;
                     html += `
-                        <div class="match-card card p-3 mb-3">
+                        <div class="match-card card mb-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center col-4 text-end justify-content-end"><span class="home-team text-truncate">${homeTeam.name}</span></div>
                                 <div class="text-center col-4">
