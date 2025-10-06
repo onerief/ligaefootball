@@ -923,9 +923,7 @@
         const generateScheduleBtn = document.getElementById('generateScheduleBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         
-        // Kredensial Admin (HANYA UNTUK DEMO)
-        // PENTING: Untuk produksi, gunakan metode otentikasi yang lebih aman.
-        // Akun admin ini akan dibuat secara otomatis jika belum ada.
+        // Kredensial Admin
         const adminEmail = 'admin@ligafun.com';
         const adminPassword = 'admarif';
         
@@ -1000,35 +998,42 @@
             e.preventDefault();
             const password = document.getElementById('password').value;
             
-            if (password === adminPassword) {
-                try {
-                    await signInWithEmailAndPassword(auth, adminEmail, password);
-                    // onAuthStateChanged akan menangani tampilan panel admin
-                } catch (error) {
-                    if (error.code === 'auth/user-not-found') {
-                        // Jika admin belum ada, buat akun baru
+            try {
+                // Langsung coba login dengan email yang sudah ditentukan dan sandi dari form
+                await signInWithEmailAndPassword(auth, adminEmail, password);
+                // onAuthStateChanged akan menangani tampilan panel admin jika berhasil
+            } catch (error) {
+                // Tangani berbagai jenis error
+                if (error.code === 'auth/user-not-found') {
+                    // Jika pengguna admin belum ada, buat akun baru HANYA jika sandi yang dimasukkan benar
+                    if (password === adminPassword) {
                         try {
                             await createUserWithEmailAndPassword(auth, adminEmail, password);
+                            // Setelah akun dibuat, onAuthStateChanged akan otomatis login
                         } catch (createError) {
                             if (createError.code === 'auth/operation-not-allowed') {
                                 alert('Gagal membuat akun admin. Pastikan metode "Email/Password" diaktifkan di Firebase Authentication console Anda.');
                             } else {
-                                alert('Gagal membuat akun admin. Cek konsol.');
+                                alert('Gagal membuat akun admin. Cek konsol untuk detail.');
                             }
                             console.error("Firebase create user error:", createError);
                         }
-                    } else if (error.code === 'auth/wrong-password') {
-                         alert('Sandi yang Anda masukkan salah!');
-                    } else if (error.code === 'auth/operation-not-allowed') {
-                        alert('Login gagal. Pastikan metode "Email/Password" diaktifkan di Firebase Authentication console Anda.');
-                        console.error("Firebase login error:", error);
                     } else {
-                        alert('Login gagal. Cek konsol untuk detail.');
-                        console.error("Firebase login error:", error);
+                        // Pengguna mencoba membuat akun admin dengan sandi yang salah
+                        alert('Sandi yang Anda masukkan salah!');
                     }
+                } else if (error.code === 'auth/wrong-password') {
+                    // Error standar untuk sandi yang salah
+                    alert('Sandi yang Anda masukkan salah!');
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    // Error konfigurasi
+                    alert('Login gagal. Pastikan metode "Email/Password" diaktifkan di Firebase Authentication console Anda.');
+                    console.error("Firebase login error:", error);
+                } else {
+                    // Error tak terduga lainnya
+                    alert('Terjadi kesalahan saat login. Cek konsol untuk detail.');
+                    console.error("Firebase login error:", error);
                 }
-            } else {
-                alert('Sandi yang Anda masukkan salah!');
             }
         });
         
