@@ -6,6 +6,9 @@
     <title>eFootball League Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2c3e50;
@@ -16,7 +19,7 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: #f8f9fa;
             color: #333;
         }
@@ -93,8 +96,8 @@
         }
         
         .league-logo, .team-logo {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
             background-color: white;
             border-radius: 5px;
@@ -212,19 +215,22 @@
         .standings-table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.9rem;
         }
         
         .standings-table th {
             background-color: var(--primary);
             color: white;
-            padding: 10px;
+            padding: 10px 8px;
             text-align: center;
+            font-weight: 600;
         }
         
         .standings-table td {
-            padding: 10px;
+            padding: 10px 8px;
             border-bottom: 1px solid #ddd;
             text-align: center;
+            vertical-align: middle;
         }
         
         .standings-table tr:nth-child(even) {
@@ -244,6 +250,13 @@
             text-align: left;
             display: flex;
             align-items: center;
+            font-weight: 500;
+        }
+
+        .team-cell .team-logo {
+            width: 28px;
+            height: 28px;
+            padding: 2px;
         }
         
         .score-input {
@@ -955,6 +968,15 @@
         // Listener data real-time dari Firestore
         onSnapshot(leaguesCol, (snapshot) => {
             leagues = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Logika untuk Tampilan Default
+            if (leagues.length > 0) {
+                const firstLeagueId = leagues[0].id;
+                if (publicStandingsLeagueSelect.value === '') publicStandingsLeagueSelect.value = firstLeagueId;
+                if (publicScheduleLeagueSelect.value === '') publicScheduleLeagueSelect.value = firstLeagueId;
+                if (scheduleLeagueSelect.value === '') scheduleLeagueSelect.value = firstLeagueId;
+                if (inputScoresLeagueSelect.value === '') inputScoresLeagueSelect.value = firstLeagueId;
+                if (standingsLeagueSelect.value === '') standingsLeagueSelect.value = firstLeagueId;
+            }
             refreshAllDisplays();
         });
 
@@ -1002,7 +1024,7 @@
                 // Langsung coba login dengan email yang sudah ditentukan dan sandi dari form
                 await signInWithEmailAndPassword(auth, adminEmail, password);
             } catch (error) {
-                // Tangani berbagai jenis error, termasuk 'invalid-login-credentials' yang baru
+                // Tangani berbagai jenis error, termasuk 'invalid-login-credentials'
                 if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
                     // Jika pengguna admin belum ada, buat akun baru HANYA jika sandi yang dimasukkan benar
                     if (password === adminPassword) {
@@ -1053,7 +1075,6 @@
                 document.querySelectorAll('#publicView .tab-content').forEach(tab => tab.classList.add('hidden'));
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(tabId).classList.remove('hidden');
-                refreshAllDisplays();
             });
         });
         
@@ -1065,7 +1086,6 @@
                 document.querySelectorAll('#adminPanel .tab-content').forEach(tab => tab.classList.add('hidden'));
                 const tabId = this.getAttribute('data-tab');
                 document.getElementById(tabId).classList.remove('hidden');
-                refreshAllDisplays();
             });
         });
 
@@ -1103,7 +1123,7 @@
         
         function displayPublicUpcomingMatches() {
             publicUpcomingMatchesList.innerHTML = '';
-            const upcomingMatches = matches.filter(match => match.homeScore === null).slice(0, 5);
+            const upcomingMatches = matches.filter(match => match.homeScore === null).sort((a,b) => a.round - b.round).slice(0, 5);
             if (upcomingMatches.length === 0) {
                 publicUpcomingMatchesList.innerHTML = '<div class="alert alert-info">Tidak ada pertandingan berikutnya.</div>';
                 return;
@@ -1116,13 +1136,13 @@
                 matchElement.className = 'match-card card p-3 mb-3';
                 matchElement.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center col-5">
                             ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
-                            <span class="home-team">${homeTeam.name}</span>
+                            <span class="home-team text-truncate">${homeTeam.name}</span>
                         </div>
-                        <div class="text-center"><div class="fw-bold">VS</div><small class="text-muted">Putaran ${match.round}</small></div>
-                        <div class="d-flex align-items-center">
-                            <span class="away-team">${awayTeam.name}</span>
+                        <div class="text-center col-2"><div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small></div>
+                        <div class="d-flex align-items-center justify-content-end col-5">
+                            <span class="away-team text-truncate">${awayTeam.name}</span>
                             ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                         </div>
                     </div>`;
@@ -1146,7 +1166,7 @@
             publicStandingsList.innerHTML = '';
             const selectedLeagueId = publicStandingsLeagueSelect.value;
             if (!selectedLeagueId) {
-                publicStandingsList.innerHTML = '<div class="alert alert-info">Pilih liga untuk melihat klasemen.</div>';
+                publicStandingsList.innerHTML = `<div class="alert alert-info">${leagues.length > 0 ? 'Pilih liga di atas untuk melihat klasemen.' : 'Belum ada liga yang dibuat. Silakan buat liga di panel admin.'}</div>`;
                 return;
             }
             const standings = calculateStandings(selectedLeagueId);
@@ -1155,7 +1175,11 @@
                     <table class="standings-table">
                         <thead>
                             <tr>
-                                <th>Pos</th><th>Tim</th><th>P</th><th>M</th><th>S</th><th>K</th><th>GM</th><th>GA</th><th>SG</th><th>Pts</th>
+                                <th>#</th><th>Tim</th><th>Main</th><th>M</th><th>S</th><th>K</th>
+                                <th class="d-none d-md-table-cell">GM</th>
+                                <th class="d-none d-md-table-cell">GK</th>
+                                <th class="d-none d-md-table-cell">SG</th>
+                                <th>Poin</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -1165,10 +1189,13 @@
                         <td class="position-cell">${index + 1}</td>
                         <td class="team-cell">
                             ${team.logo ? `<img src="${team.logo}" alt="${team.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
-                            ${team.name}
+                            <span class="text-truncate">${team.name}</span>
                         </td>
                         <td>${team.played}</td><td>${team.wins}</td><td>${team.draws}</td><td>${team.losses}</td>
-                        <td>${team.goalsFor}</td><td>${team.goalsAgainst}</td><td>${team.goalDifference}</td><td><strong>${team.points}</strong></td>
+                        <td class="d-none d-md-table-cell">${team.goalsFor}</td>
+                        <td class="d-none d-md-table-cell">${team.goalsAgainst}</td>
+                        <td class="d-none d-md-table-cell">${team.goalDifference}</td>
+                        <td><strong>${team.points}</strong></td>
                     </tr>`;
             });
             html += `</tbody></table></div>`;
@@ -1179,7 +1206,7 @@
              publicScheduleList.innerHTML = '';
             const selectedLeagueId = publicScheduleLeagueSelect.value;
             if (!selectedLeagueId) {
-                publicScheduleList.innerHTML = '<div class="alert alert-info">Pilih liga untuk melihat jadwal.</div>';
+                publicScheduleList.innerHTML = `<div class="alert alert-info">${leagues.length > 0 ? 'Pilih liga di atas untuk melihat jadwal.' : 'Belum ada jadwal yang dibuat. Silakan buat jadwal di panel admin.'}</div>`;
                 return;
             }
              const leagueMatches = matches.filter(match => match.leagueId === selectedLeagueId);
@@ -1202,19 +1229,19 @@
                     if (!homeTeam || !awayTeam) return;
                     const matchElement = document.createElement('div');
                     matchElement.className = 'match-card card p-3 mb-3';
-                    let resultHtml = `<div class="fw-bold">VS</div><small class="text-muted">Round ${match.round}</small>`;
+                    let resultHtml = `<div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small>`;
                     if (match.homeScore !== null && match.awayScore !== null) {
-                         resultHtml = `<div class="fw-bold">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">Putaran ${match.round}</small>`;
+                         resultHtml = `<div class="fw-bold">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
                     }
                     matchElement.innerHTML = `
                          <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center col-5">
                                 ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
-                                <span class="home-team">${homeTeam.name}</span>
+                                <span class="home-team text-truncate">${homeTeam.name}</span>
                             </div>
-                            <div class="text-center">${resultHtml}</div>
-                            <div class="d-flex align-items-center">
-                                <span class="away-team">${awayTeam.name}</span>
+                            <div class="text-center col-2">${resultHtml}</div>
+                            <div class="d-flex align-items-center justify-content-end col-5">
+                                <span class="away-team text-truncate">${awayTeam.name}</span>
                                 ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                             </div>
                         </div>`;
@@ -1257,7 +1284,7 @@
         
         function displayUpcomingMatches() {
             upcomingMatchesList.innerHTML = '';
-             const upcomingMatches = matches.filter(match => match.homeScore === null).slice(0, 5);
+            const upcomingMatches = matches.filter(match => match.homeScore === null).sort((a,b) => a.round - b.round).slice(0, 5);
             if (upcomingMatches.length === 0) {
                 upcomingMatchesList.innerHTML = '<div class="alert alert-info">Tidak ada pertandingan berikutnya.</div>';
                 return;
@@ -1270,13 +1297,13 @@
                 matchElement.className = 'match-card card p-3 mb-3';
                 matchElement.innerHTML = `
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center col-5">
                             ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
-                            <span class="home-team">${homeTeam.name}</span>
+                            <span class="home-team text-truncate">${homeTeam.name}</span>
                         </div>
-                        <div class="text-center"><div class="fw-bold">VS</div><small class="text-muted">Putaran ${match.round}</small></div>
-                        <div class="d-flex align-items-center">
-                            <span class="away-team">${awayTeam.name}</span>
+                        <div class="text-center col-2"><div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small></div>
+                        <div class="d-flex align-items-center justify-content-end col-5">
+                            <span class="away-team text-truncate">${awayTeam.name}</span>
                             ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
                         </div>
                     </div>`;
@@ -1335,8 +1362,50 @@
         }
         
         function displaySchedule() {
-            displayPublicSchedule(); // Sama dengan publik, tapi di elemen berbeda
-            scheduleList.innerHTML = publicScheduleList.innerHTML;
+            scheduleList.innerHTML = '';
+            const selectedLeagueId = scheduleLeagueSelect.value;
+            if (!selectedLeagueId) {
+                scheduleList.innerHTML = '<div class="alert alert-info">Pilih liga untuk melihat jadwal.</div>';
+                return;
+            }
+             const leagueMatches = matches.filter(match => match.leagueId === selectedLeagueId);
+            if (leagueMatches.length === 0) {
+                scheduleList.innerHTML = '<div class="alert alert-info">Belum ada jadwal untuk liga ini. Klik "Buat Jadwal".</div>';
+                return;
+            }
+            // Logic to display schedule (same as public view)
+            const rounds = {};
+            leagueMatches.forEach(match => { if (!rounds[match.round]) rounds[match.round] = []; rounds[match.round].push(match); });
+            Object.keys(rounds).sort((a, b) => parseInt(a) - parseInt(b)).forEach(round => {
+                const roundElement = document.createElement('div');
+                roundElement.className = 'mb-4';
+                roundElement.innerHTML = `<div class="round-title">Putaran ${round}</div>`;
+                rounds[round].forEach(match => {
+                     const homeTeam = teams.find(team => team.id === match.homeTeamId);
+                    const awayTeam = teams.find(team => team.id === match.awayTeamId);
+                    if (!homeTeam || !awayTeam) return;
+                    const matchElement = document.createElement('div');
+                    matchElement.className = 'match-card card p-3 mb-3';
+                    let resultHtml = `<div class="fw-bold">VS</div><small class="text-muted">P ${match.round}</small>`;
+                    if (match.homeScore !== null && match.awayScore !== null) {
+                         resultHtml = `<div class="fw-bold">${match.homeScore} - ${match.awayScore}</div><small class="text-muted">P ${match.round}</small>`;
+                    }
+                    matchElement.innerHTML = `
+                         <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center col-5">
+                                ${homeTeam.logo ? `<img src="${homeTeam.logo}" alt="${homeTeam.name}" class="team-logo me-2">` : `<div class="team-logo me-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
+                                <span class="home-team text-truncate">${homeTeam.name}</span>
+                            </div>
+                            <div class="text-center col-2">${resultHtml}</div>
+                            <div class="d-flex align-items-center justify-content-end col-5">
+                                <span class="away-team text-truncate">${awayTeam.name}</span>
+                                ${awayTeam.logo ? `<img src="${awayTeam.logo}" alt="${awayTeam.name}" class="team-logo ms-2">` : `<div class="team-logo ms-2 d-flex align-items-center justify-content-center bg-light"><i class="fas fa-user text-secondary"></i></div>`}
+                            </div>
+                        </div>`;
+                    roundElement.appendChild(matchElement);
+                });
+                scheduleList.appendChild(roundElement);
+            });
         }
 
         function displayInputScores() {
@@ -1352,10 +1421,7 @@
                 return;
             }
             const rounds = {};
-            leagueMatches.forEach(match => {
-                if (!rounds[match.round]) rounds[match.round] = [];
-                rounds[match.round].push(match);
-            });
+            leagueMatches.forEach(match => { if (!rounds[match.round]) rounds[match.round] = []; rounds[match.round].push(match); });
             let html = '';
             Object.keys(rounds).sort((a, b) => parseInt(a) - parseInt(b)).forEach(round => {
                 html += `<div class="round-title">Putaran ${round}</div>`;
@@ -1366,10 +1432,10 @@
                     html += `
                         <div class="match-card card p-3 mb-3">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center"><span class="home-team">${homeTeam.name}</span></div>
-                                <div class="text-center">
+                                <div class="d-flex align-items-center col-4 text-end justify-content-end"><span class="home-team text-truncate">${homeTeam.name}</span></div>
+                                <div class="text-center col-4">
                                     <form class="input-score-form" data-matchid="${match.id}">
-                                        <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center justify-content-center">
                                             <input type="number" min="0" class="form-control score-input" value="${match.homeScore !== null ? match.homeScore : ''}" placeholder="0" required>
                                             <span class="match-result">-</span>
                                             <input type="number" min="0" class="form-control score-input" value="${match.awayScore !== null ? match.awayScore : ''}" placeholder="0" required>
@@ -1377,7 +1443,7 @@
                                         <button type="submit" class="btn btn-primary btn-sm mt-2">Simpan</button>
                                     </form>
                                 </div>
-                                <div class="d-flex align-items-center"><span class="away-team">${awayTeam.name}</span></div>
+                                <div class="d-flex align-items-center col-4"><span class="away-team text-truncate">${awayTeam.name}</span></div>
                             </div>
                         </div>`;
                 });
@@ -1386,8 +1452,11 @@
         }
         
         function displayStandings() {
-            displayPublicStandings(); // Sama dengan publik
+            const selectedLeagueId = standingsLeagueSelect.value;
             standingsList.innerHTML = publicStandingsList.innerHTML;
+            if(!selectedLeagueId) {
+                standingsList.innerHTML = `<div class="alert alert-info">${leagues.length > 0 ? 'Pilih liga di atas untuk melihat klasemen.' : 'Belum ada liga yang dibuat.'}</div>`;
+            }
         }
 
         function populateLeagueSelect(selectElement) {
@@ -1478,15 +1547,20 @@
 
         async function deleteTeam(teamId) {
             if (!confirm('Yakin hapus tim?')) return;
-            await deleteDoc(doc(db, 'teams', teamId));
-            // Perlu menghapus jadwal yang melibatkan tim ini juga
+            
             const batch = writeBatch(db);
+
+            // Hapus tim
+            batch.delete(doc(db, 'teams', teamId));
+
+            // Hapus jadwal yang melibatkan tim ini
             const homeMatchesQuery = query(matchesCol, where("homeTeamId", "==", teamId));
             const awayMatchesQuery = query(matchesCol, where("awayTeamId", "==", teamId));
             const homeMatches = await getDocs(homeMatchesQuery);
             const awayMatches = await getDocs(awayMatchesQuery);
             homeMatches.forEach(matchDoc => batch.delete(matchDoc.ref));
             awayMatches.forEach(matchDoc => batch.delete(matchDoc.ref));
+            
             await batch.commit();
             alert('Tim berhasil dihapus!');
         }
@@ -1508,23 +1582,25 @@
                 return;
             }
 
-            // Hapus jadwal lama
-            const oldMatchesQuery = query(matchesCol, where("leagueId", "==", leagueId));
-            const oldMatchesSnapshot = await getDocs(oldMatchesQuery);
-            const deleteBatch = writeBatch(db);
-            oldMatchesSnapshot.forEach(doc => deleteBatch.delete(doc.ref));
-            await deleteBatch.commit();
-            
-            // Buat jadwal baru
-            const schedule = generateRoundRobinSchedule(leagueTeams.map(t => t.id), leagueId);
-            const addBatch = writeBatch(db);
-            schedule.forEach(matchData => {
-                const newMatchRef = doc(matchesCol); // Buat ref baru dengan ID otomatis
-                addBatch.set(newMatchRef, matchData);
-            });
-            await addBatch.commit();
+            if(confirm('Membuat jadwal baru akan menghapus jadwal lama untuk liga ini. Lanjutkan?')) {
+                // Hapus jadwal lama
+                const oldMatchesQuery = query(matchesCol, where("leagueId", "==", leagueId));
+                const oldMatchesSnapshot = await getDocs(oldMatchesQuery);
+                const deleteBatch = writeBatch(db);
+                oldMatchesSnapshot.forEach(doc => deleteBatch.delete(doc.ref));
+                await deleteBatch.commit();
+                
+                // Buat jadwal baru
+                const schedule = generateRoundRobinSchedule(leagueTeams.map(t => t.id), leagueId);
+                const addBatch = writeBatch(db);
+                schedule.forEach(matchData => {
+                    const newMatchRef = doc(matchesCol); // Buat ref baru dengan ID otomatis
+                    addBatch.set(newMatchRef, matchData);
+                });
+                await addBatch.commit();
 
-            alert(`Jadwal berhasil dibuat! ${schedule.length} pertandingan dibuat.`);
+                alert(`Jadwal berhasil dibuat! ${schedule.length} pertandingan dibuat.`);
+            }
         });
 
         // =================================================================
@@ -1533,7 +1609,7 @@
 
         function calculateStandings(leagueId) {
              const leagueTeams = teams.filter(team => team.leagueId === leagueId);
-            const leagueMatches = matches.filter(match => match.leagueId === leagueId && match.homeScore !== null);
+            const leagueMatches = matches.filter(match => match.leagueId === leagueId && match.homeScore !== null && match.awayScore !== null);
             const standings = leagueTeams.map(team => ({
                 id: team.id, name: team.name, logo: team.logo, played: 0, wins: 0, draws: 0, losses: 0,
                 goalsFor: 0, goalsAgainst: 0, goalDifference: 0, points: 0
@@ -1554,7 +1630,7 @@
             });
 
             standings.forEach(s => s.goalDifference = s.goalsFor - s.goalsAgainst);
-            return standings.sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor);
+            return standings.sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference || b.goalsFor - a.goalsFor || a.name.localeCompare(b.name));
         }
 
         function generateRoundRobinSchedule(teamIds, leagueId) {
